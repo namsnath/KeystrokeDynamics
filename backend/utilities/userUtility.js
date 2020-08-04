@@ -1,3 +1,4 @@
+const ss = require('simple-statistics');
 const { logger } = require('./loggers');
 
 const User = require('../models/User');
@@ -60,7 +61,90 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
 
   return data;
 };
+
+const computeDataTendencies = (keystrokeData) => {
+  const types = ['hold', 'flight', 'dd', 'full'];
+  types.map((type) => {
+    keystrokeData[type].means = keystrokeData[type].means.map(
+      (v, i) => ss.mean(keystrokeData[type].times.map((timeArr) => timeArr[i])),
+    );
+    keystrokeData[type].sd = keystrokeData[type].sd.map(
+      (v, i) => ss.standardDeviation(keystrokeData[type].times.map(
+        (timeArr) => timeArr[i],
+      )),
+    );
+
+    return type;
+  });
+
+  return keystrokeData;
+};
+
+module.exports.createSignupDataFromProcessedData = (username, passwords, processedData) => {
+  let signupData = {
+    username,
+    password: passwords[0],
+    keystrokeDataTimestamps: [],
+    keystrokeData: {
+      hold: {
+        keys: [],
+        times: [],
+        means: [],
+        sd: [],
+      },
+      flight: {
+        keys: [],
+        times: [],
+        means: [],
+        sd: [],
+      },
+      dd: {
+        keys: [],
+        times: [],
+        means: [],
+        sd: [],
+      },
+      full: {
+        keys: [],
+        times: [],
+        means: [],
+        sd: [],
+      },
+    },
   };
+
+  signupData = processedData.reduce((acc, v, i) => {
+    if (i === 0) {
+      acc.keystrokeData.hold.keys = v.hold.keys;
+      acc.keystrokeData.hold.means = Array(v.hold.keys.length).fill(0);
+      acc.keystrokeData.hold.sd = Array(v.hold.keys.length).fill(0);
+
+      acc.keystrokeData.flight.keys = v.flight.keys;
+      acc.keystrokeData.flight.means = Array(v.flight.keys.length).fill(0);
+      acc.keystrokeData.flight.sd = Array(v.flight.keys.length).fill(0);
+
+      acc.keystrokeData.dd.keys = v.dd.keys;
+      acc.keystrokeData.dd.means = Array(v.dd.keys.length).fill(0);
+      acc.keystrokeData.dd.sd = Array(v.dd.keys.length).fill(0);
+
+      acc.keystrokeData.full.keys = v.full.keys;
+      acc.keystrokeData.full.means = Array(v.full.keys.length).fill(0);
+      acc.keystrokeData.full.sd = Array(v.full.keys.length).fill(0);
+    }
+
+    acc.keystrokeData.hold.times.push(v.hold.times);
+    acc.keystrokeData.flight.times.push(v.flight.times);
+    acc.keystrokeData.dd.times.push(v.dd.times);
+    acc.keystrokeData.full.times.push(v.full.times);
+
+    acc.keystrokeDataTimestamps.push(Date.now());
+
+    return acc;
+  }, signupData);
+
+  signupData.keystrokeData = computeDataTendencies(signupData.keystrokeData);
+
+  return signupData;
 };
 
 module.exports.findUser = (username) => User.findOne({ username }).exec();
