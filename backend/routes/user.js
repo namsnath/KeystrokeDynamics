@@ -34,31 +34,19 @@ router.post('/signup', async (req, res) => {
     return res.status(403).json({ success: false, msg: 'Passwords don\'t match' });
   }
 
-  if (userInDb.length > 0) { // If the user already exists in the Database
+  if (userInDb) { // If the user already exists in the Database
     return res.status(403).json({ success: false, msg: 'User already exists in DB' });
   }
 
-  const keystrokeData = {
-    hold: {
-      keys: [],
-      times: [],
-    },
-    flight: {
-      keys: [],
-      times: [],
-    },
-    dd: {
-      keys: [],
-      times: [],
-    },
-  };
+  const signupData = createSignupDataFromProcessedData(username, passwords, processedAttempts);
 
-  keystrokeData.hold.keys = processedAttempts.hold.keys;
-  keystrokeData.flight.keys = processedAttempts.flight.keys;
-  keystrokeData.dd.keys = processedAttempts.dd.keys;
-
-  // Proceed with adding data to the db
-  return res.json(processedAttempts);
+  try {
+    const newUserData = await signUpNewUser(signupData);
+    logger.info(`Signed up ${username}`);
+    return res.json(newUserData);
+  } catch (error) {
+    return res.status(500).json({ success: false, msg: 'Error signing up', error });
+  }
 });
 
 module.exports = router;
