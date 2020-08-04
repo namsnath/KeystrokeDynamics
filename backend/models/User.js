@@ -4,22 +4,35 @@ const userSchema = new mongoose.Schema({
   username: { type: String, unique: true },
   password: String,
 
-  keystrokeSampleHeaders: [String],
-  keystrokeSamples: [[Number]],
-
   keystrokeDataTimestamps: [Date],
   keystrokeData: {
     hold: {
       keys: [String],
       times: [[Number]],
+      sums: [Number],
+      means: [Number],
+      sd: [Number],
     },
     flight: {
       keys: [String],
       times: [[Number]],
+      sums: [Number],
+      means: [Number],
+      sd: [Number],
     },
     dd: {
       keys: [String],
       times: [[Number]],
+      sums: [Number],
+      means: [Number],
+      sd: [Number],
+    },
+    full: {
+      keys: [String],
+      times: [[Number]],
+      sums: [Number],
+      means: [Number],
+      sd: [Number],
     },
   },
 });
