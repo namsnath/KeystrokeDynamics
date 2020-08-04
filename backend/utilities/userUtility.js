@@ -65,15 +65,13 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
 module.exports.findUser = (username) => User.findOne({ username }).exec();
 
 module.exports.signUpNewUser = ({
-  username, password, data, linearStringArray, linearTimeArrays,
+  username, password, keystrokeData, keystrokeDataTimestamps,
 }) => User.create({
   username,
   password,
-  keystrokeData: data,
-  keystrokeSampleHeaders: linearStringArray,
-  keystrokeSamples: [linearTimeArrays],
-  keystrokeDataTimestamps: [Date.now()],
-}).exec();
+  keystrokeData,
+  keystrokeDataTimestamps,
+});
 
 module.exports.addDataToUser = async ({
   username, password, data, linearStringArray, linearTimeArray,
