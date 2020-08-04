@@ -3,7 +3,7 @@ const { logger } = require('./loggers');
 
 const User = require('../models/User');
 
-module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
+const processKeystrokeData = ({ password, keydown, keyup }) => {
   const data = {
     hold: {
       keys: [],
@@ -80,7 +80,7 @@ const computeDataTendencies = (keystrokeData) => {
   return keystrokeData;
 };
 
-module.exports.createSignupDataFromProcessedData = (username, passwords, processedData) => {
+const createSignupDataFromProcessedData = (username, passwords, processedData) => {
   let signupData = {
     username,
     password: passwords[0],
@@ -147,9 +147,9 @@ module.exports.createSignupDataFromProcessedData = (username, passwords, process
   return signupData;
 };
 
-module.exports.findUser = (username) => User.findOne({ username }).exec();
+const findUser = (username) => User.findOne({ username }).exec();
 
-module.exports.signUpNewUser = ({
+const signUpNewUser = ({
   username, password, keystrokeData, keystrokeDataTimestamps,
 }) => User.create({
   username,
@@ -158,7 +158,7 @@ module.exports.signUpNewUser = ({
   keystrokeDataTimestamps,
 });
 
-module.exports.addDataToUser = async ({
+const addDataToUser = async ({
   username, password, data, linearStringArray, linearTimeArray,
 }) => {
   // TODO: Add check for matching string arrays
@@ -176,4 +176,12 @@ module.exports.addDataToUser = async ({
   }
 
   userData.keystrokeDataTimestamps.push(Date.now());
+};
+
+module.exports = {
+  processKeystrokeData,
+  createSignupDataFromProcessedData,
+  findUser,
+  signUpNewUser,
+  addDataToUser,
 };
