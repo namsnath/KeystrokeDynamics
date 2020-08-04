@@ -89,7 +89,7 @@ function keyupEvent(e) {
 function sendToServer() {
   let data = {
     username: usernameField.value,
-    password: passwordFields.map(v => v.value),
+    passwords: passwordFields.map(v => v.value),
     keydown: keydownArray,
     keyup: keyupArray,
   };

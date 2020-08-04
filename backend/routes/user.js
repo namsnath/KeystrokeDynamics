@@ -14,15 +14,15 @@ router.post('/validateKeystroke', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-  const attemptCount = req.body.password.length;
   const {
-    password, keydown, keyup, username,
+    passwords, keydown, keyup, username,
   } = req.body;
+  const attemptCount = passwords.length;
 
   const processedAttempts = Array(attemptCount)
     .fill()
     .map((v, i) => processKeystrokeData(
-      { password: password[i], keydown: keydown[i], keyup: keyup[i] },
+      { password: passwords[i], keydown: keydown[i], keyup: keyup[i] },
     ));
 
   const passwordsEqual = processedAttempts
