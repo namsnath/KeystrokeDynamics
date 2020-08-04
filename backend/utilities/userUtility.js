@@ -3,7 +3,7 @@ const { logger } = require('./loggers');
 
 const User = require('../models/User');
 
-const processKeystrokeData = ({ password, keydown, keyup }) => {
+const processKeystrokeData = ({ keydown, keyup }) => {
   const data = {
     hold: {
       keys: [],
