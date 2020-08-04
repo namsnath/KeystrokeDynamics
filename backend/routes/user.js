@@ -1,7 +1,12 @@
 const express = require('express');
 const _ = require('lodash');
 const { logger } = require('../utilities/loggers');
-const { processKeystrokeData, findUser } = require('../utilities/userUtility');
+const {
+  processKeystrokeData,
+  findUser,
+  signUpNewUser,
+  createSignupDataFromProcessedData,
+} = require('../utilities/userUtility');
 
 const router = express.Router();
 
