@@ -26,7 +26,7 @@ router.post('/signup', async (req, res) => {
     ));
 
   const passwordsEqual = processedAttempts
-    .every((v) => _.isEqual(v.linearStringArray, processedAttempts[0].linearStringArray));
+    .every((v) => _.isEqual(v.full.keys, processedAttempts[0].full.keys));
 
   const userInDb = await findUser(username);
 

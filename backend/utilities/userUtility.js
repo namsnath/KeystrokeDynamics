@@ -16,10 +16,11 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
       keys: [],
       times: [],
     },
+    full: {
+      keys: [],
+      times: [],
+    },
   };
-
-  const linearTimeArray = [];
-  const linearStringArray = [];
 
   for (let i = 0; i < keydown.length; i += 1) {
     const { code: downCode, key: downKey, time: downTime } = keydown[i];
@@ -31,8 +32,8 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
       logger.error(`Keydown: ${keydown}\nKeyup: ${keyup}`);
     }
 
-    linearStringArray.push(`H:${downKey}`);
-    linearTimeArray.push(holdTime);
+    data.full.keys.push(`H:${downKey}`);
+    data.full.times.push(holdTime);
 
     data.hold.keys.push(downKey);
     data.hold.times.push(holdTime);
@@ -43,11 +44,11 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
       const flightTime = nextDownTime - upTime;
       const ddTime = nextDownTime - downTime;
 
-      linearStringArray.push(`F:${keyString}`);
-      linearTimeArray.push(flightTime);
+      data.full.keys.push(`F:${keyString}`);
+      data.full.times.push(flightTime);
 
-      linearStringArray.push(`DD:${keyString}`);
-      linearTimeArray.push(ddTime);
+      data.full.keys.push(`DD:${keyString}`);
+      data.full.times.push(ddTime);
 
       data.flight.keys.push(keyString);
       data.flight.times.push(flightTime);
@@ -57,8 +58,8 @@ module.exports.processKeystrokeData = ({ password, keydown, keyup }) => {
     }
   }
 
-  return {
-    data, linearStringArray, linearTimeArray,
+  return data;
+};
   };
 };
 
