@@ -64,7 +64,11 @@ const processKeystrokeData = ({ keydown, keyup }) => {
 
 const computeDataTendencies = (keystrokeData) => {
   const types = ['hold', 'flight', 'dd', 'full'];
+  // Mean and SD of full data
   types.map((type) => {
+    // keystrokeData[type].means.map for each mean (for each key)
+    // i is the column (key)
+    // timeArr is each row (attempt/entry)
     keystrokeData[type].means = keystrokeData[type].means.map(
       (v, i) => ss.mean(keystrokeData[type].times.map((timeArr) => timeArr[i])),
     );
@@ -72,6 +76,34 @@ const computeDataTendencies = (keystrokeData) => {
       (v, i) => ss.standardDeviation(keystrokeData[type].times.map(
         (timeArr) => timeArr[i],
       )),
+    );
+
+    // const filtered = { means: [], sd: [] };
+    // filtered.means = Array(keystrokeData[type].means.length).fill(0);
+    // filtered.sd = Array(keystrokeData[type].sd.length).fill(0);
+
+    keystrokeData[type].filteredMeans = keystrokeData[type].filteredMeans.map(
+      (v, i) => ss.mean(
+        keystrokeData[type].times
+          // Get the appropriate times
+          .map((timeArr) => timeArr[i])
+          // Filter by distance between time and mean
+          .filter(
+            (val) => euclidean(val, keystrokeData[type].means[i]) < 3 * keystrokeData[type].sd[i],
+          ),
+      ),
+    );
+
+    keystrokeData[type].filteredSd = keystrokeData[type].filteredSd.map(
+      (v, i) => ss.standardDeviation(
+        keystrokeData[type].times
+          // Get the appropriate times
+          .map((timeArr) => timeArr[i])
+          // Filter by distance between time and mean
+          .filter(
+            (val) => euclidean(val, keystrokeData[type].means[i]) < 3 * keystrokeData[type].sd[i],
+          ),
+      ),
     );
 
     return type;
