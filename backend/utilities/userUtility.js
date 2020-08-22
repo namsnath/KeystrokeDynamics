@@ -150,7 +150,7 @@ const createSignupDataFromProcessedData = (username, passwords, processedData) =
 
         // Length of the processedData array is the number of attempts
         // Times is an array of arrays of each attempt
-        acc.keystrokeData[type].times = Array(v.length).fill(0);
+        acc.keystrokeData[type].times = Array(v.length).fill([]);
 
         acc.keystrokeData[type].means = Array(v[type].keys.length).fill(0);
         acc.keystrokeData[type].sd = Array(v[type].keys.length).fill(0);
