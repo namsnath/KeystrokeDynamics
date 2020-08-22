@@ -3,6 +3,20 @@ const { logger } = require('./loggers');
 
 const User = require('../models/User');
 
+const euclidean = (d1, d2, w = 1) => Math.sqrt(w * (Math.abs(d2 - d1) ** 2));
+
+const cityblock = (d1, d2) => Math.abs(d1 - d2);
+
+const cityblockArray = (a1, a2) => ss.sum(
+  a1.map((v, i) => Math.abs(a1[i] - a2[i])),
+);
+
+const euclideanArray = (a1, a2, w) => Math.sqrt(
+  ss.sum(
+    a1.map((v, i) => (w?.[i] ?? 1) * (Math.abs(a1[i] - a2[i]) ** 2)),
+  ),
+);
+
 const processKeystrokeData = ({ keydown, keyup }) => {
   const data = {
     hold: {
