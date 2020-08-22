@@ -86,56 +86,35 @@ const createSignupDataFromProcessedData = (username, passwords, processedData) =
     password: passwords[0],
     keystrokeDataTimestamps: [],
     keystrokeData: {
-      hold: {
-        keys: [],
-        times: [],
-        means: [],
-        sd: [],
+      hold: {},
+      flight: {},
+      dd: {},
+      full: {},
       },
-      flight: {
-        keys: [],
-        times: [],
-        means: [],
-        sd: [],
-      },
-      dd: {
-        keys: [],
-        times: [],
-        means: [],
-        sd: [],
-      },
-      full: {
-        keys: [],
-        times: [],
-        means: [],
-        sd: [],
-      },
-    },
   };
 
   signupData = processedData.reduce((acc, v, i) => {
+    const types = ['hold', 'flight', 'dd', 'full'];
+
+    types.map((type) => {
     if (i === 0) {
-      acc.keystrokeData.hold.keys = v.hold.keys;
-      acc.keystrokeData.hold.means = Array(v.hold.keys.length).fill(0);
-      acc.keystrokeData.hold.sd = Array(v.hold.keys.length).fill(0);
+        // Keys of the processed data is checked for equality
+        // So the first one is used for the dataset
+        acc.keystrokeData[type].keys = v[type].keys;
 
-      acc.keystrokeData.flight.keys = v.flight.keys;
-      acc.keystrokeData.flight.means = Array(v.flight.keys.length).fill(0);
-      acc.keystrokeData.flight.sd = Array(v.flight.keys.length).fill(0);
+        // Length of the processedData array is the number of attempts
+        // Times is an array of arrays of each attempt
+        acc.keystrokeData[type].times = Array(v.length).fill(0);
 
-      acc.keystrokeData.dd.keys = v.dd.keys;
-      acc.keystrokeData.dd.means = Array(v.dd.keys.length).fill(0);
-      acc.keystrokeData.dd.sd = Array(v.dd.keys.length).fill(0);
-
-      acc.keystrokeData.full.keys = v.full.keys;
-      acc.keystrokeData.full.means = Array(v.full.keys.length).fill(0);
-      acc.keystrokeData.full.sd = Array(v.full.keys.length).fill(0);
+        acc.keystrokeData[type].means = Array(v[type].keys.length).fill(0);
+        acc.keystrokeData[type].sd = Array(v[type].keys.length).fill(0);
+        acc.keystrokeData[type].filteredMeans = Array(v[type].keys.length).fill(0);
+        acc.keystrokeData[type].filteredSd = Array(v[type].keys.length).fill(0);
     }
+      acc.keystrokeData[type].times[i] = v[type].times;
 
-    acc.keystrokeData.hold.times.push(v.hold.times);
-    acc.keystrokeData.flight.times.push(v.flight.times);
-    acc.keystrokeData.dd.times.push(v.dd.times);
-    acc.keystrokeData.full.times.push(v.full.times);
+      return type;
+    });
 
     acc.keystrokeDataTimestamps.push(Date.now());
 
