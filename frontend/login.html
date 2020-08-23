@@ -1,14 +1,196 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+  <title>Login</title>
+  <script src="js/chart.min.js"></script>
   <script src='js/keystrokeLogger.js'></script>
   <script src='js/login.js'></script>
-<head>
 </head>
 
+<style>
+  div {
+    display: flex;
+  }
+
+  table, tr, td, th {
+    border: 1px solid black;
+  }
+
+  td, th {
+    padding: 2px 5px;
+  }
+
+  tr th:first-child {
+    text-align: right;
+  }
+
+  tr td {
+    text-align: center;
+  }
+
+  .fieldsContainer {
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .fieldsContainer input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .standardContainer, .filteredContainer {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .sliders {
+    display: flex;
+  }
+
+  .sliderContainer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .checkboxContainer {
+    align-items: center;
+  }
+
+  .chartContainer {
+    position: relative;
+    height: 100px;
+    width: 200px;
+  }
+</style>
+
 <body>
-  <input id='usernameField' placeholder='Username'>
-  <br><br>
-  <input id='passwordField' placeholder='Password'>
+  <div>
+    <div class="fieldsContainer">
+      <input id='usernameField' placeholder='Username'>
+      <input id='passwordField' placeholder='Password'>
+    </div>
+
+    <div class="standardContainer">
+      <div class="sliders">
+        <div class="sliderContainer">
+          <label>Standard SD Multiplier</label>
+          <input type="range" min="0" max="2.5" step="0.1" value="2.5" id="standardSdSlider">
+          <label id="standardSdLabel">2.5</label>
+        </div>
+  
+        <div class="sliderContainer">
+          <label>Standard Threshold</label>
+          <input type="range" min="1" max="100" value="65" id="standardThresholdSlider">
+          <label id="standardThresholdLabel">65</label>
+        </div>
+      </div>
+
+      <div class="checkboxContainer">
+        <input type="checkbox" id="standardCheckbox" checked>
+        <label>Use Standard</label>
+      </div>
+    </div>
+
+    <div class="filteredContainer">
+      <div class="sliders">
+        <div class="sliderContainer">
+          <label>Filtered SD Multiplier</label>
+          <input type="range" min="0" max="2.5" step="0.1" value="2.5" id="filteredSdSlider">
+          <label id="filteredSdLabel">2.5</label>
+        </div>
+
+        <div class="sliderContainer">
+          <label>Filtered Threshold</label>
+          <input type="range" min="1" max="100" value="65" id="filteredThresholdSlider">
+          <label id="filteredThresholdLabel">65</label>
+        </div>
+      </div>
+
+      <div class="checkboxContainer">
+        <input type="checkbox" id="filteredCheckbox">
+        <label>Use Filtered</label>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <table id="dataTable">
+      <tr>
+        <th></th>
+        <th>Standard</th>
+        <th>Filtered</th>
+      </tr>
+      <tr>
+        <th>Enabled</th>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Threshold</th>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>SD Multiplier</th>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Score</th>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Accepted</th>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Attempt Accepted</th>
+        <th colspan="2"></th>
+      </tr>
+    </table>
+  </div>
+
+  <div>
+    <div class="chartContainer">
+      <canvas id="standard_hold"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="standard_flight"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="standard_dd"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="standard_full"></canvas>
+    </div>
+
+  </div>
+  <div>
+    <div class="chartContainer">
+      <canvas id="filtered_hold"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="filtered_flight"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="filtered_dd"></canvas>
+    </div>
+
+    <div class="chartContainer">
+      <canvas id="filtered_full"></canvas>
+    </div>
+
+  </div>
 </body>
 
 </html>
