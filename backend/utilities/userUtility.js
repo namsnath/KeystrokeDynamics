@@ -136,14 +136,14 @@ const createSignupDataFromProcessedData = (username, passwords, processedData) =
       flight: {},
       dd: {},
       full: {},
-      },
+    },
   };
 
   signupData = processedData.reduce((acc, v, i) => {
     const types = ['hold', 'flight', 'dd', 'full'];
 
     types.map((type) => {
-    if (i === 0) {
+      if (i === 0) {
         // Keys of the processed data is checked for equality
         // So the first one is used for the dataset
         acc.keystrokeData[type].keys = v[type].keys;
@@ -156,7 +156,7 @@ const createSignupDataFromProcessedData = (username, passwords, processedData) =
         acc.keystrokeData[type].sd = Array(v[type].keys.length).fill(0);
         acc.keystrokeData[type].filteredMeans = Array(v[type].keys.length).fill(0);
         acc.keystrokeData[type].filteredSd = Array(v[type].keys.length).fill(0);
-    }
+      }
       acc.keystrokeData[type].times[i] = v[type].times;
 
       return type;
@@ -203,10 +203,141 @@ const addDataToUser = async ({
   userData.keystrokeDataTimestamps.push(Date.now());
 };
 
+const calculateStandardScores = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  sdThreshold = 2.5,
+}) => {
+  const types = ['hold', 'flight', 'dd', 'full'];
+  const scores = {
+    distance: {},
+    low: {},
+    high: {},
+    inrange: {},
+    inrangeCount: {},
+    totalCount: {},
+    inrangePercent: {},
+    distanceSum: {},
+  };
+
+  types.map((type) => {
+    scores.distance[type] = Array(userKeystrokeData[type].means.length).fill(0);
+    scores.low[type] = Array(userKeystrokeData[type].means.length).fill(0);
+    scores.high[type] = Array(userKeystrokeData[type].means.length).fill(0);
+    scores.inrange[type] = Array(userKeystrokeData[type].means.length).fill(0);
+    scores.distanceSum[type] = 0;
+    scores.inrangeCount[type] = 0;
+    scores.totalCount[type] = 0;
+    scores.inrangePercent[type] = 0;
+
+    userKeystrokeData[type].means.map((v, i) => {
+      const mean = userKeystrokeData[type].means[i];
+      const sd = userKeystrokeData[type].sd[i];
+      const attemptTime = attemptKeystrokeData[type].times[i];
+
+      scores.distance[type][i] = cityblock(mean, attemptTime);
+      scores.distanceSum[type] += cityblock(mean, attemptTime);
+      scores.low[type][i] = mean - (sd * sdThreshold);
+      scores.high[type][i] = mean + (sd * sdThreshold);
+      scores.inrange[type][i] = attemptTime >= scores.low[type][i]
+        && attemptTime <= scores.high[type][i];
+
+      scores.inrangeCount[type] += !!scores.inrange[type][i];
+      scores.totalCount[type] += 1;
+      return v;
+    });
+
+    scores.inrangePercent[type] = (scores.inrangeCount[type] / scores.totalCount[type]) * 100;
+
+    return type;
+  });
+
+  return scores;
+};
+
+const calculateFilteredScores = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  sdThreshold = 2.5,
+}) => {
+  const types = ['hold', 'flight', 'dd', 'full'];
+  const scores = {
+    distance: {},
+    low: {},
+    high: {},
+    inrange: {},
+    inrangeCount: {},
+    totalCount: {},
+    inrangePercent: {},
+    distanceSum: {},
+  };
+
+  types.map((type) => {
+    scores.distance[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
+    scores.low[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
+    scores.high[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
+    scores.inrange[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
+    scores.distanceSum[type] = 0;
+    scores.inrangeCount[type] = 0;
+    scores.totalCount[type] = 0;
+    scores.inrangePercent[type] = 0;
+
+    userKeystrokeData[type].filteredMeans.map((v, i) => {
+      const mean = userKeystrokeData[type].filteredMeans[i];
+      const sd = userKeystrokeData[type].filteredSd[i];
+      const attemptTime = attemptKeystrokeData[type].times[i];
+
+      scores.distance[type][i] = cityblock(mean, attemptTime);
+      scores.distanceSum[type] += cityblock(mean, attemptTime);
+      scores.low[type][i] = mean - (sd * sdThreshold);
+      scores.high[type][i] = mean + (sd * sdThreshold);
+      scores.inrange[type][i] = attemptTime >= scores.low[type][i]
+        && attemptTime <= scores.high[type][i];
+
+      scores.inrangeCount[type] += !!scores.inrange[type][i];
+      scores.totalCount[type] += 1;
+      return v;
+    });
+
+    scores.inrangePercent[type] = (scores.inrangeCount[type] / scores.totalCount[type]) * 100;
+
+    return type;
+  });
+
+  return scores;
+};
+
+const calculateAttemptScores = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  standardSdThreshold = 2.5,
+  filteredSdThreshold = 2.5,
+}) => {
+  const scores = {
+    standard: {},
+    filtered: {},
+  };
+
+  scores.standard = calculateStandardScores({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    sdThreshold: standardSdThreshold,
+  });
+
+  scores.filtered = calculateFilteredScores({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    sdThreshold: filteredSdThreshold,
+  });
+
+  return scores;
+};
+
 module.exports = {
   processKeystrokeData,
   createSignupDataFromProcessedData,
   findUser,
   signUpNewUser,
   addDataToUser,
+  calculateAttemptScores,
 };
