@@ -183,24 +183,26 @@ const signUpNewUser = ({
   keystrokeDataTimestamps,
 });
 
-const addDataToUser = async ({
-  username, password, data, linearStringArray, linearTimeArray,
+const updateUser = ({
+  username, updateData,
+}) => User.updateOne({ username }, updateData).exec();
+
+const addAttemptToKeystrokeData = ({
+  userData, attemptKeystrokeData,
 }) => {
-  // TODO: Add check for matching string arrays
-  const userData = await User.findOne({ username }).exec();
+  const types = ['hold', 'flight', 'dd', 'full'];
 
-  // TODO: Replace with a check to match passwords
-  if (!userData.password) {
-    userData.password = password;
-  }
-
-  if (!userData.keystrokeData) {
-    userData.keystrokeData = data;
-  } else if (userData.keystrokeData.hold.keys === data.hold.keys) {
-    userData.keystrokeData.hold.times.push(data.hold.times);
-  }
-
+  types.map((type) => {
+    userData.keystrokeData[type].times.push(attemptKeystrokeData[type].times);
+    return type;
+  });
   userData.keystrokeDataTimestamps.push(Date.now());
+
+  userData.keystrokeData = computeDataTendencies(userData.keystrokeData);
+
+  // console.log(userData);
+
+  return userData;
 };
 
 const calculateStandardScores = ({
@@ -366,7 +368,8 @@ module.exports = {
   createSignupDataFromProcessedData,
   findUser,
   signUpNewUser,
-  addDataToUser,
+  updateUser,
+  addAttemptToKeystrokeData,
   calculateAttemptScores,
   verifyAttempt,
 };
