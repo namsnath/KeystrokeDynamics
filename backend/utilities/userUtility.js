@@ -326,6 +326,8 @@ const calculateAttemptScores = ({
   const scores = {
     standard: {},
     filtered: {},
+    standardSdThreshold,
+    filteredSdThreshold,
   };
 
   scores.standard = calculateStandardScores({
@@ -359,9 +361,11 @@ const verifyAttempt = ({
   const filteredAccepted = !useFiltered || (filteredScore >= filteredThreshold);
 
   const result = {
+    useStandard,
     standardScore,
     standardThreshold,
     standardAccepted,
+    useFiltered,
     filteredScore,
     filteredThreshold,
     filteredAccepted,
