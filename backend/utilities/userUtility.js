@@ -333,6 +333,34 @@ const calculateAttemptScores = ({
   return scores;
 };
 
+const verifyAttempt = ({
+  scores,
+  useStandard = true,
+  useFiltered = false,
+  standardThreshold = 65,
+  filteredThreshold = 65,
+}) => {
+  const {
+    standard: { inrangePercent: { full: standardScore } },
+    filtered: { inrangePercent: { full: filteredScore } },
+  } = scores;
+
+  const standardAccepted = !useStandard || (standardScore >= standardThreshold);
+  const filteredAccepted = !useFiltered || (filteredScore >= filteredThreshold);
+
+  const result = {
+    standardScore,
+    standardThreshold,
+    standardAccepted,
+    filteredScore,
+    filteredThreshold,
+    filteredAccepted,
+    accepted: standardAccepted && filteredAccepted,
+  };
+
+  return result;
+};
+
 module.exports = {
   processKeystrokeData,
   createSignupDataFromProcessedData,
@@ -340,4 +368,5 @@ module.exports = {
   signUpNewUser,
   addDataToUser,
   calculateAttemptScores,
+  verifyAttempt,
 };
