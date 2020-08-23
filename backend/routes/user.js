@@ -125,10 +125,16 @@ router.post('/login', async (req, res) => {
   return res.json({
     ...result,
     db: {
-      hold: userInDb.keystrokeData.hold.times,
-      flight: userInDb.keystrokeData.flight.times,
-      dd: userInDb.keystrokeData.dd.times,
-      full: userInDb.keystrokeData.full.times,
+      hold: userInDb.keystrokeData.hold.means,
+      flight: userInDb.keystrokeData.flight.means,
+      dd: userInDb.keystrokeData.dd.means,
+      full: userInDb.keystrokeData.full.means,
+    },
+    filteredDb: {
+      hold: userInDb.keystrokeData.hold.filteredMeans,
+      flight: userInDb.keystrokeData.flight.filteredMeans,
+      dd: userInDb.keystrokeData.dd.filteredMeans,
+      full: userInDb.keystrokeData.full.filteredMeans,
     },
     attempt: {
       hold: processedAttempt.hold.times,
