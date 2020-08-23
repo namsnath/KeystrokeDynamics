@@ -77,6 +77,8 @@ const processKeystrokeData = ({ keydown, keyup }) => {
 };
 
 const computeDataTendencies = (keystrokeData) => {
+  const SDMultFilter = 2;
+
   const types = ['hold', 'flight', 'dd', 'full'];
   // Mean and SD of full data
   types.map((type) => {
@@ -103,7 +105,10 @@ const computeDataTendencies = (keystrokeData) => {
           .map((timeArr) => timeArr[i])
           // Filter by distance between time and mean
           .filter(
-            (val) => euclidean(val, keystrokeData[type].means[i]) < 3 * keystrokeData[type].sd[i],
+            (val) => euclidean(
+              val,
+              keystrokeData[type].means[i],
+            ) < SDMultFilter * keystrokeData[type].sd[i],
           ),
       ),
     );
@@ -115,7 +120,10 @@ const computeDataTendencies = (keystrokeData) => {
           .map((timeArr) => timeArr[i])
           // Filter by distance between time and mean
           .filter(
-            (val) => euclidean(val, keystrokeData[type].means[i]) < 3 * keystrokeData[type].sd[i],
+            (val) => euclidean(
+              val,
+              keystrokeData[type].means[i],
+            ) < SDMultFilter * keystrokeData[type].sd[i],
           ),
       ),
     );
