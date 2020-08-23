@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
       sums: [Number],
       means: [Number],
       sd: [Number],
+      filteredMeans: [Number],
+      filteredSd: [Number],
     },
     flight: {
       keys: [String],
@@ -19,6 +21,8 @@ const userSchema = new mongoose.Schema({
       sums: [Number],
       means: [Number],
       sd: [Number],
+      filteredMeans: [Number],
+      filteredSd: [Number],
     },
     dd: {
       keys: [String],
@@ -26,6 +30,8 @@ const userSchema = new mongoose.Schema({
       sums: [Number],
       means: [Number],
       sd: [Number],
+      filteredMeans: [Number],
+      filteredSd: [Number],
     },
     full: {
       keys: [String],
@@ -33,6 +39,8 @@ const userSchema = new mongoose.Schema({
       sums: [Number],
       means: [Number],
       sd: [Number],
+      filteredMeans: [Number],
+      filteredSd: [Number],
     },
   },
 });
