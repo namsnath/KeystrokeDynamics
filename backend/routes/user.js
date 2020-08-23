@@ -71,9 +71,11 @@ router.post('/login', async (req, res) => {
     keyup,
     username,
     standardSdThreshold,
-    stdAccThresh,
+    standardThreshold,
     filteredSdThreshold,
-    filteredAccThresh,
+    filteredThreshold,
+    useStandard = true,
+    useFiltered = false,
   } = req.body;
 
   const processedAttempt = processKeystrokeData({ keydown, keyup });
@@ -101,12 +103,17 @@ router.post('/login', async (req, res) => {
     filteredSdThreshold,
   });
 
+  const {
+    standardSdThreshold: standardSDMultiplier,
+    filteredSdThreshold: filteredSDMultiplier,
+  } = scores;
+
   const result = verifyAttempt({
     scores,
-    useStandard: true,
-    useFiltered: false,
-    standardThreshold: stdAccThresh,
-    filteredThreshold: filteredAccThresh,
+    useStandard,
+    useFiltered,
+    standardThreshold,
+    filteredThreshold,
   });
 
   if (result.accepted) {
@@ -123,6 +130,8 @@ router.post('/login', async (req, res) => {
   }
 
   return res.json({
+    standardSDMultiplier,
+    filteredSDMultiplier,
     ...result,
     db: {
       hold: userInDb.keystrokeData.hold.means,
