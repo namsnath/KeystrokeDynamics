@@ -10,6 +10,7 @@ const {
   calculateAttemptScores,
   verifyAttempt,
   addAttemptToKeystrokeData,
+  computeDataTendencies,
 } = require('../utilities/userUtility');
 
 const router = express.Router();
@@ -24,6 +25,14 @@ router.post('/validateKeystroke', (req, res) => {
 
 router.get('/find/:username', async (req, res) => {
   res.json(await findUser(req.params.username));
+});
+
+router.get('/tendencies/:username', async (req, res) => {
+  const user = await findUser(req.params.username);
+  return res.json({
+    db: user.keystrokeData,
+    calc: computeDataTendencies(user.keystrokeData),
+  });
 });
 
 router.post('/signup', async (req, res) => {
