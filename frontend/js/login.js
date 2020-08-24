@@ -3,11 +3,11 @@ var keyupArray = [];
 var keyCount = 0;
 
 var usernameField, passwordField;
-var stdThreshSlider, filThreshSlider;
-var stdThreshLabel, filThreshLabel;
+var stdThreshSlider, filThreshSlider, mahThreshSlider;
+var stdThreshLabel, filThreshLabel, mahThreshLabel;
 var stdSdSlider, filSdSlider;
 var stdSdLabel, filSdLabel;
-var stdCheckbox, filCheckbox;
+var stdCheckbox, filCheckbox, mahCheckbox;
 
 const charts = {
   standard: {},
@@ -62,8 +62,10 @@ function sendToServer() {
     keyup: keyupArray,
     standardThreshold: Number(stdThreshSlider.value),
     filteredThreshold: Number(filThreshSlider.value),
+    mahalanobisDistanceThreshold: Number(mahThreshSlider.value),
     useStandard: stdCheckbox.checked,
     useFiltered: filCheckbox.checked,
+    useMahalanobis: mahCheckbox.checked,
     standardSdThreshold: Number(stdSdSlider.value),
     filteredSdThreshold: Number(filSdSlider.value),
   };
@@ -83,6 +85,7 @@ function sendToServer() {
 
       const stdKeys = ['useStandard', 'standardThreshold', 'standardSDMultiplier', 'standardScore', 'standardAccepted'];
       const filKeys = ['useFiltered', 'filteredThreshold', 'filteredSDMultiplier', 'filteredScore', 'filteredAccepted'];
+      const mahKeys = ['useMahalanobis', 'mahalanobisThreshold', '', 'mahalanobisDistance', 'mahalanobisAccepted'];
 
       const table = document.getElementById('dataTable');
       Array.from(table.getElementsByTagName('tr')).map((row, i) => {
@@ -94,6 +97,10 @@ function sendToServer() {
         const cells = row.getElementsByTagName('td');
         cells[0].innerHTML = response[stdKeys[i - 1]];
         cells[1].innerHTML = response[filKeys[i - 1]];
+
+        if (i != 3) {
+          cells[2].innerHTML = response[mahKeys[i - 1]];
+        }
       });
 
       types.map((type) => {
@@ -251,9 +258,17 @@ window.onload = function () {
     filSdLabel.innerHTML = filSdSlider.value;
   }
 
+  mahThreshSlider = document.getElementById('mahalanobisThresholdSlider');
+  mahThreshLabel = document.getElementById('mahalanobisThresholdLabel');
+  mahThreshLabel.innerHTML = mahThreshSlider.value;
+  mahThreshSlider.oninput =function() {
+    mahThreshLabel.innerHTML = mahThreshSlider.value;
+  }
+
 
   stdCheckbox = document.getElementById('standardCheckbox');
   filCheckbox = document.getElementById('filteredCheckbox');
+  mahCheckbox = document.getElementById('mahalanobisCheckbox');
 
   passwordField.addEventListener('keydown', this.keydownEvent);
   passwordField.addEventListener('keyup', this.keyupEvent);

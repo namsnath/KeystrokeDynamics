@@ -30,7 +30,7 @@ router.get('/find/:username', async (req, res) => {
 router.get('/tendencies/:username', async (req, res) => {
   const user = await findUser(req.params.username);
   return res.json({
-    db: user.keystrokeData,
+    db: (await findUser(req.params.username)).keystrokeData,
     calc: computeDataTendencies(user.keystrokeData),
   });
 });
@@ -83,8 +83,10 @@ router.post('/login', async (req, res) => {
     standardThreshold,
     filteredSdThreshold,
     filteredThreshold,
+    mahalanobisDistanceThreshold,
     useStandard = true,
     useFiltered = false,
+    useMahalanobis = false,
   } = req.body;
 
   const processedAttempt = processKeystrokeData({ keydown, keyup });
@@ -110,17 +112,20 @@ router.post('/login', async (req, res) => {
     attemptKeystrokeData: processedAttempt,
     standardSdThreshold,
     filteredSdThreshold,
+    mahalanobisDistanceThreshold,
   });
 
   const {
     standardSdThreshold: standardSDMultiplier,
     filteredSdThreshold: filteredSDMultiplier,
+    mahalanobisDistanceThreshold: mahalanobisThreshold,
   } = scores;
 
   const result = verifyAttempt({
     scores,
     useStandard,
     useFiltered,
+    useMahalanobis,
     standardThreshold,
     filteredThreshold,
   });
@@ -139,6 +144,7 @@ router.post('/login', async (req, res) => {
   }
 
   return res.json({
+    mahalanobisThreshold,
     standardSDMultiplier,
     filteredSDMultiplier,
     ...result,

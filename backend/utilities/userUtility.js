@@ -1,12 +1,48 @@
 const ss = require('simple-statistics');
 const _ = require('lodash');
+const math = require('mathjs');
 const { logger } = require('./loggers');
 
 const User = require('../models/User');
 
+const matrixMult = (a, b) => {
+  if (!a[0].length) a = [a];
+  if (!b[0].length) b = [b];
+
+  const result = new Array(a.length).fill(0).map(() => new Array(b[0].length).fill(0));
+
+  return result.map(
+    (row, i) => row.map(
+      (val, j) => a[i].reduce(
+        (sum, elm, k) => sum + (elm * b[k][j]), 0,
+      ),
+    ),
+  );
+};
+
+const confidence = (mean, sd, n, c = 0.95) => {
+
+};
+
 const euclidean = (d1, d2, w = 1) => Math.sqrt(w * (Math.abs(d2 - d1) ** 2));
 
 const cityblock = (d1, d2) => Math.abs(d1 - d2);
+
+const mahalanobis = (attempt, mean, covMatrix) => {
+  // D = sqrt((x-mean) * S^-1 * (x - mean)^T)
+  // Wikipedia uses a column vector, we use a row vector
+  // Thus, transpose is on the right and not left (like on Wiki)
+
+  const sInv = math.inv(covMatrix);
+  const diffVector = attempt.map((v, i) => v - mean[i]);
+  const transDiffVector = diffVector.map((v) => [v]);
+
+  const leftProduct = matrixMult(diffVector, sInv);
+  const product = matrixMult(leftProduct, transDiffVector);
+
+  const distance = Math.sqrt(product);
+  return distance;
+};
 
 const cityblockArray = (a1, a2) => ss.sum(
   a1.map((v, i) => Math.abs(a1[i] - a2[i])),
@@ -16,6 +52,10 @@ const euclideanArray = (a1, a2, w) => Math.sqrt(
   ss.sum(
     a1.map((v, i) => (w?.[i] ?? 1) * (Math.abs(a1[i] - a2[i]) ** 2)),
   ),
+);
+
+const covariance = (x, y, xMean, yMean, n) => (1 / (n - 1)) * ss.sum(
+  Array(n).fill(0).map((v, i) => (x[i] - xMean) * (y[i] - yMean)),
 );
 
 const processKeystrokeData = ({ keydown, keyup }) => {
@@ -101,6 +141,26 @@ const computeFilteredTendencies = (data, SDFilterMultiplier = 2) => {
   return { filteredMeans, filteredSd };
 };
 
+const computeMahalanobis = (data, means) => {
+  const transTime = _.unzip(data.times);
+
+  const obsCount = data.times.length;
+  const featureCount = data.times[0].length;
+
+  const covMatrix = new Array(featureCount).fill(0).map(() => new Array(featureCount).fill(0));
+
+  Array(featureCount).fill(0).map((v, i) => {
+    Array(featureCount).fill(0).map((w, j) => {
+      covMatrix[i][j] = covariance(transTime[i], transTime[j], means[i], means[j], obsCount);
+
+      return j;
+    });
+    return i;
+  });
+
+  return { covMatrix };
+};
+
 const computeDataTendencies = (keystrokeData) => {
   const types = ['hold', 'flight', 'dd', 'full'];
 
@@ -112,6 +172,9 @@ const computeDataTendencies = (keystrokeData) => {
     const { filteredMeans, filteredSd } = computeFilteredTendencies(keystrokeData[type]);
     keystrokeData[type].filteredMeans = filteredMeans;
     keystrokeData[type].filteredSd = filteredSd;
+
+    const { covMatrix } = computeMahalanobis(keystrokeData[type], means);
+    keystrokeData[type].covMatrix = covMatrix;
 
     return type;
   });
@@ -302,17 +365,52 @@ const calculateFilteredScores = ({
   return scores;
 };
 
+const calculateMahalanobisScores = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  distanceThreshold = 2,
+}) => {
+  const types = ['hold', 'flight', 'dd', 'full'];
+  const scores = {
+    distance: {},
+    inrange: {},
+  };
+
+  types.map((type) => {
+    scores.distance[type] = 0;
+    scores.inrange[type] = false;
+
+    const distance = mahalanobis(
+      attemptKeystrokeData[type].times,
+      userKeystrokeData[type].means,
+      userKeystrokeData[type].covMatrix,
+    );
+
+    scores.distance[type] = distance;
+    if (distance <= distanceThreshold) {
+      scores.inrange[type] = true;
+    }
+
+    return type;
+  });
+
+  return scores;
+};
+
 const calculateAttemptScores = ({
   userKeystrokeData,
   attemptKeystrokeData,
   standardSdThreshold = 2.5,
   filteredSdThreshold = 2.5,
+  mahalanobisDistanceThreshold = 2,
 }) => {
   const scores = {
     standard: {},
     filtered: {},
+    mahalanobis: {},
     standardSdThreshold,
     filteredSdThreshold,
+    mahalanobisDistanceThreshold,
   };
 
   scores.standard = calculateStandardScores({
@@ -327,6 +425,12 @@ const calculateAttemptScores = ({
     sdThreshold: filteredSdThreshold,
   });
 
+  scores.mahalanobis = calculateMahalanobisScores({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    distanceThreshold: mahalanobisDistanceThreshold,
+  });
+
   return scores;
 };
 
@@ -334,16 +438,22 @@ const verifyAttempt = ({
   scores,
   useStandard = true,
   useFiltered = false,
+  useMahalanobis = false,
   standardThreshold = 65,
   filteredThreshold = 65,
 }) => {
   const {
     standard: { inrangePercent: { full: standardScore } },
     filtered: { inrangePercent: { full: filteredScore } },
+    mahalanobis: {
+      inrange: { full: mahalanobisInrange },
+      distance: { full: mahalanobisDistance },
+    },
   } = scores;
 
   const standardAccepted = !useStandard || (standardScore >= standardThreshold);
   const filteredAccepted = !useFiltered || (filteredScore >= filteredThreshold);
+  const mahalanobisAccepted = !useMahalanobis || mahalanobisInrange;
 
   const result = {
     useStandard,
@@ -354,7 +464,10 @@ const verifyAttempt = ({
     filteredScore,
     filteredThreshold,
     filteredAccepted,
-    accepted: standardAccepted && filteredAccepted,
+    useMahalanobis,
+    mahalanobisDistance,
+    mahalanobisAccepted,
+    accepted: standardAccepted && filteredAccepted && mahalanobisAccepted,
   };
 
   return result;
