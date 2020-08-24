@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
       sd: [Number],
       filteredMeans: [Number],
       filteredSd: [Number],
+      covMatrix: [[Number]],
     },
     flight: {
       keys: [String],
@@ -23,6 +24,7 @@ const userSchema = new mongoose.Schema({
       sd: [Number],
       filteredMeans: [Number],
       filteredSd: [Number],
+      covMatrix: [[Number]],
     },
     dd: {
       keys: [String],
@@ -32,6 +34,7 @@ const userSchema = new mongoose.Schema({
       sd: [Number],
       filteredMeans: [Number],
       filteredSd: [Number],
+      covMatrix: [[Number]],
     },
     full: {
       keys: [String],
@@ -41,6 +44,7 @@ const userSchema = new mongoose.Schema({
       sd: [Number],
       filteredMeans: [Number],
       filteredSd: [Number],
+      covMatrix: [[Number]],
     },
   },
 });
