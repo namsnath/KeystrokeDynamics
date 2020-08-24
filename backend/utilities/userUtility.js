@@ -1,4 +1,5 @@
 const ss = require('simple-statistics');
+const _ = require('lodash');
 const { logger } = require('./loggers');
 
 const User = require('../models/User');
@@ -76,57 +77,41 @@ const processKeystrokeData = ({ keydown, keyup }) => {
   return data;
 };
 
+const computeStandardTendencies = (data) => {
+  const transposedData = _.unzip(data.times);
+
+  const means = data.means.map((v, i) => ss.mean(transposedData[i]));
+  const sd = data.sd.map((v, i) => ss.standardDeviation(transposedData[i]));
+
+  return { means, sd };
+};
+
+const computeFilteredTendencies = (data, SDFilterMultiplier = 2) => {
+  const transposedData = _.unzip(data.times)
+    .map(
+      (row) => row.filter( // Each Row is now the columns of original matrix
+        // Each element (attempt for a given keystroke) is checked and filtered
+        (v, i) => euclidean(v, data.means[i]) < SDFilterMultiplier * data.sd[i],
+      ),
+    );
+
+  const filteredMeans = data.filteredMeans.map((v, i) => ss.mean(transposedData[i]));
+  const filteredSd = data.filteredSd.map((v, i) => ss.standardDeviation(transposedData[i]));
+
+  return { filteredMeans, filteredSd };
+};
+
 const computeDataTendencies = (keystrokeData) => {
-  const SDMultFilter = 2;
-
   const types = ['hold', 'flight', 'dd', 'full'];
-  // Mean and SD of full data
+
   types.map((type) => {
-    // keystrokeData[type].means.map for each mean (for each key)
-    // i is the column (key)
-    // timeArr is each row (attempt/entry)
-    keystrokeData[type].means = keystrokeData[type].means.map(
-      (v, i) => ss.mean(keystrokeData[type].times.map((timeArr) => timeArr[i])),
-    );
-    keystrokeData[type].sd = keystrokeData[type].sd.map(
-      (v, i) => ss.standardDeviation(keystrokeData[type].times.map(
-        (timeArr) => timeArr[i],
-      )),
-    );
+    const { means, sd } = computeStandardTendencies(keystrokeData[type]);
+    keystrokeData[type].means = means;
+    keystrokeData[type].sd = sd;
 
-    // const filtered = { means: [], sd: [] };
-    // filtered.means = Array(keystrokeData[type].means.length).fill(0);
-    // filtered.sd = Array(keystrokeData[type].sd.length).fill(0);
-
-    keystrokeData[type].filteredMeans = keystrokeData[type].filteredMeans.map(
-      (v, i) => ss.mean(
-        keystrokeData[type].times
-          // Get the appropriate times
-          .map((timeArr) => timeArr[i])
-          // Filter by distance between time and mean
-          .filter(
-            (val) => euclidean(
-              val,
-              keystrokeData[type].means[i],
-            ) < SDMultFilter * keystrokeData[type].sd[i],
-          ),
-      ),
-    );
-
-    keystrokeData[type].filteredSd = keystrokeData[type].filteredSd.map(
-      (v, i) => ss.standardDeviation(
-        keystrokeData[type].times
-          // Get the appropriate times
-          .map((timeArr) => timeArr[i])
-          // Filter by distance between time and mean
-          .filter(
-            (val) => euclidean(
-              val,
-              keystrokeData[type].means[i],
-            ) < SDMultFilter * keystrokeData[type].sd[i],
-          ),
-      ),
-    );
+    const { filteredMeans, filteredSd } = computeFilteredTendencies(keystrokeData[type]);
+    keystrokeData[type].filteredMeans = filteredMeans;
+    keystrokeData[type].filteredSd = filteredSd;
 
     return type;
   });
@@ -384,4 +369,5 @@ module.exports = {
   addAttemptToKeystrokeData,
   calculateAttemptScores,
   verifyAttempt,
+  computeDataTendencies,
 };
