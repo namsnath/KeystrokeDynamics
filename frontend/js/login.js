@@ -146,33 +146,8 @@ function sendToServer() {
       });
 
       types.map((type) => {
-        // Standard
-        populateChartWithResponse(
-          charts.standard[type],
-          'DB',
-          'db',
-          response.db[type],
-        );
-        populateChartWithResponse(
-          charts.standard[type],
-          '',
-          'user',
-          response.attempt[type],
-        );
-
-        // Filtered
-        populateChartWithResponse(
-          charts.filtered[type],
-          'DB',
-          'db',
-          response.filteredDb[type],
-        );
-        populateChartWithResponse(
-          charts.filtered[type],
-          '',
-          'user',
-          response.attempt[type],
-        );
+        populateChart(charts.standard[type], response.db[type], response.attempt[type]);
+        populateChart(charts.filtered[type], response.db[type], response.attempt[type]);
       });
     }
   });
@@ -227,6 +202,11 @@ function initialiseCharts() {
       charts[chartType][type] = new Chart(canvas, config);
     });
   });
+}
+
+function populateChart(chart, dbData, userData) {
+  populateChartWithResponse(chart, 'DB', 'db', dbData);
+  populateChartWithResponse(chart, '', 'user', userData);
 }
 
 function populateChartWithResponse(chart, label="", datasetLabel, data) {
