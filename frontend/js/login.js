@@ -181,7 +181,7 @@ function initialiseCharts() {
       options: {
         title: {
           display: true,
-          text: `Standard ${type}`,
+          // text: `Standard ${type}`,
         },
         scales: scaleConfig,
         legend: legendConfig,
@@ -197,7 +197,7 @@ function initialiseCharts() {
       options: {
         title: {
           display: true,
-          text: `Filtered ${type}`,
+          // text: `Filtered ${type}`,
         },
         scales: scaleConfig,
         legend: legendConfig,

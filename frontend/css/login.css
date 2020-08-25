@@ -1,0 +1,127 @@
+@font-face {
+  font-family: barlow;
+  src: url(../barlow/Barlow-Regular.ttf);
+}
+
+@font-face {
+  font-family: barlow;
+  src: url(../barlow/Barlow-Bold.ttf);
+  font-weight: bold;
+}
+
+html {
+  --surface: #121212;
+  --elevation00dp: #FFFFFF00;
+  --elevation01dp: #FFFFFF0D;
+  --elevation02dp: #FFFFFF12;
+  --elevation03dp: #FFFFFF14;
+  --elevation04dp: #FFFFFF17;
+  --elevation06dp: #FFFFFF1C;
+  --elevation08dp: #FFFFFF1F;
+  --elevation12dp: #FFFFFF24;
+  --elevation16dp: #FFFFFF26;
+  --elevation24dp: #FFFFFF29;
+
+  --surface-hover: #FFFFFF0A;
+
+  --text-high-emphasis: #FFFFFFDE;
+  --text-medium-emphasis: #FFFFFF99;
+  --text-disabled: #FFFFFF61;
+
+  font-size: 1em;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text-high-emphasis);
+}
+
+div {
+  display: flex;
+  font-family: barlow;
+}
+
+table, tr, td, th {
+  border-collapse: collapse;
+  background-color: var(--elevation00dp);
+}
+
+td, th {
+  padding: 0.2rem 0.4rem;
+  border-right: 1px solid var(--text-disabled)
+}
+
+th:last-child, td:last-child, tr:last-child th { 
+  border: none;
+}
+
+tr th:first-child {
+  text-align: right;
+}
+
+tr td {
+  text-align: center;
+}
+
+.card {
+  border-radius: 7px;
+  padding: 0.7rem;
+  margin: 0.5rem;
+  background-color: var(--elevation02dp);
+}
+
+.tableContainer {
+  display: inline-flex;
+}
+
+.fieldsContainer {
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.fieldsContainer input {
+  margin: 1rem 0;
+  padding: 0 0.4rem;
+  line-height: 1.5rem;
+  color: var(--text-high-emphasis);
+  background-color: var(--elevation04dp);
+  border: 1px solid black;
+  font-family: barlow;
+}
+
+.standardContainer, .filteredContainer, .mahalanobisContainer {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+}
+
+.sliderContainer {
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  border-radius: 7px;
+  padding: 0.7rem;
+  margin: 0.5rem;
+  background-color: var(--elevation04dp);
+}
+
+.checkboxContainer {
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.chartContainer {
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+  height: 100px;
+  width: 200px;
+  border-bottom: 1px solid black;
+}

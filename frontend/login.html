@@ -3,81 +3,33 @@
 
 <head>
   <title>Login</title>
+  <link rel="stylesheet" href="css/login.css">
   <script src="js/chart.min.js"></script>
   <script src='js/keystrokeLogger.js'></script>
   <script src='js/login.js'></script>
 </head>
 
 <style>
-  div {
-    display: flex;
-  }
 
-  table, tr, td, th {
-    border: 1px solid black;
-  }
-
-  td, th {
-    padding: 2px 5px;
-  }
-
-  tr th:first-child {
-    text-align: right;
-  }
-
-  tr td {
-    text-align: center;
-  }
-
-  .fieldsContainer {
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .fieldsContainer input {
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-
-  .standardContainer, .filteredContainer, .mahalanobisContainer {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid black;
-    margin: 5px;
-    padding: 5px;
-  }
-
-  .sliders {
-    display: flex;
-  }
-
-  .sliderContainer {
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-
-  .checkboxContainer {
-    align-items: center;
-  }
-
-  .chartContainer {
-    position: relative;
-    height: 100px;
-    width: 200px;
-    border-bottom: 1px solid black;
-  }
 </style>
 
 <body>
+  <div class="leftContainer">
+
+  </div>
+
   <div>
-    <div class="fieldsContainer">
+    <div class="card fieldsContainer">
       <input id='usernameField' placeholder='Username'>
       <input id='passwordField' placeholder='Password'>
     </div>
 
-    <div class="standardContainer">
+    <div class="card standardContainer">
+      <div class="checkboxContainer">
+        <input type="checkbox" id="standardCheckbox" checked>
+        <label>Use Standard</label>
+      </div>
+
       <div class="sliders">
         <div class="sliderContainer">
           <label>Standard SD Multiplier</label>
@@ -91,14 +43,14 @@
           <label id="standardThresholdLabel">65</label>
         </div>
       </div>
-
-      <div class="checkboxContainer">
-        <input type="checkbox" id="standardCheckbox" checked>
-        <label>Use Standard</label>
-      </div>
     </div>
 
-    <div class="filteredContainer">
+    <div class="card filteredContainer">
+      <div class="checkboxContainer">
+        <input type="checkbox" id="filteredCheckbox">
+        <label>Use Filtered</label>
+      </div>
+
       <div class="sliders">
         <div class="sliderContainer">
           <label>Filtered SD Multiplier</label>
@@ -112,14 +64,14 @@
           <label id="filteredThresholdLabel">65</label>
         </div>
       </div>
-
-      <div class="checkboxContainer">
-        <input type="checkbox" id="filteredCheckbox">
-        <label>Use Filtered</label>
-      </div>
     </div>
 
-    <div class="mahalanobisContainer">
+    <div class="card mahalanobisContainer">
+      <div class="checkboxContainer">
+        <input type="checkbox" id="mahalanobisCheckbox">
+        <label>Use Mahalanobis</label>
+      </div>
+
       <div class="sliders">
         <div class="sliderContainer">
           <label>Mahalanobis Threshold</label>
@@ -127,16 +79,11 @@
           <label id="mahalanobisThresholdLabel">2</label>
         </div>
       </div>
-  
-      <div class="checkboxContainer">
-        <input type="checkbox" id="mahalanobisCheckbox">
-        <label>Use Mahalanobis</label>
-      </div>
     </div>
   </div>
 </div>
 
-  <div>
+  <div class="card tableContainer">
     <table id="dataTable">
       <tr>
         <th></th>
@@ -182,37 +129,45 @@
   </div>
 
   <div>
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Standard hold</label>
       <canvas id="standard_hold"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Standard flight</label>
       <canvas id="standard_flight"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Standard dd</label>
       <canvas id="standard_dd"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Standard full</label>
       <canvas id="standard_full"></canvas>
     </div>
 
   </div>
   <div>
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Filtered hold</label>
       <canvas id="filtered_hold"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Filtered flight</label>
       <canvas id="filtered_flight"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Filtered dd</label>
       <canvas id="filtered_dd"></canvas>
     </div>
 
-    <div class="chartContainer">
+    <div class="card chartContainer">
+      <label>Filtered full</label>
       <canvas id="filtered_full"></canvas>
     </div>
 
