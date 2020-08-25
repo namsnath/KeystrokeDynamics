@@ -3,18 +3,60 @@ var keyupArray = [];
 var keyCount = 0;
 
 var usernameField, passwordField;
-var stdThreshSlider, filThreshSlider, mahThreshSlider;
-var stdThreshLabel, filThreshLabel, mahThreshLabel;
-var stdSdSlider, filSdSlider;
-var stdSdLabel, filSdLabel;
-var stdCheckbox, filCheckbox, mahCheckbox;
 
-const charts = {
-  standard: {},
-  filtered: {},
-};
-
+// For charts
+const chartTypes = ['standard', 'filtered'];
 const types = ['hold', 'flight', 'dd', 'full'];
+
+// For controls
+const detectors = ['standard', 'filtered', 'mahalanobis'];
+const controlTypes = ['checkbox', 'slider'];
+const sliderTypes = ['threshold', 'sd'];
+const labelTypes = ['checkbox', 'threshold', 'sd'];
+
+const charts = chartTypes.reduce((a, v) => ({
+  ...a,
+  [v]: types.reduce((acc, val) => ({...acc, [val]: undefined}), {}),
+}), {});
+console.log(charts);
+
+// Define controls present in HTML here
+const controls = {
+  standard: {
+    slider: {
+      threshold: undefined, 
+      sd: undefined,
+    },
+    checkbox: undefined,
+    label: {
+      threshold: undefined,
+      sd: undefined,
+      checkbox: undefined,
+    },
+  },
+  filtered: {
+    slider: {
+      threshold: undefined, 
+      sd: undefined,
+    },
+    checkbox: undefined,
+    label: {
+      threshold: undefined,
+      sd: undefined,
+      checkbox: undefined,
+    },
+  },
+  mahalanobis: {
+    slider: {
+      threshold: undefined,
+    },
+    checkbox: undefined,
+    label: {
+      threshold: undefined,
+      checkbox: undefined,
+    },
+  },
+};
 
 function clearData() {
   passwordField.value = '';
@@ -60,14 +102,14 @@ function sendToServer() {
     password: passwordField.value,
     keydown: keydownArray,
     keyup: keyupArray,
-    standardThreshold: Number(stdThreshSlider.value),
-    filteredThreshold: Number(filThreshSlider.value),
-    mahalanobisDistanceThreshold: Number(mahThreshSlider.value),
-    useStandard: stdCheckbox.checked,
-    useFiltered: filCheckbox.checked,
-    useMahalanobis: mahCheckbox.checked,
-    standardSdThreshold: Number(stdSdSlider.value),
-    filteredSdThreshold: Number(filSdSlider.value),
+    useStandard: controls.standard.checkbox.checked,
+    useFiltered: controls.filtered.checkbox.checked,
+    useMahalanobis: controls.mahalanobis.checkbox.checked,
+    standardThreshold: Number(controls.standard.slider.threshold.value),
+    filteredThreshold: Number(controls.filtered.slider.threshold.value),
+    mahalanobisDistanceThreshold: Number(controls.mahalanobis.slider.threshold.value),
+    standardSdThreshold: Number(controls.standard.slider.sd.value),
+    filteredSdThreshold: Number(controls.filtered.slider.sd.value),
   };
 
   clearData();
@@ -137,75 +179,53 @@ function sendToServer() {
 }
 
 function initialiseCharts() {
-  types.map((type) => {
-    const scaleConfig = {
-      xAxes: [{
-        gridLines: {
-          display: false,
-        },
-      }],
-      yAxes: [{
-        gridLines: {
-          display: false,
-        },
-        ticks: {
-          display: false,
-        },
-      }],
-    };
+  Chart.defaults.global.elements.point.radius = 0;
+  Chart.defaults.global.elements.point.hitRadius = 3;
 
-    const initialData = {
+  const config = {
+    type: 'line',
+    data: {
       labels: [],
       datasets: [
+        {
+          label: 'user',
+          data: [],
+          backgroundColor: '#28666e66',
+        },
         {
           label: 'db',
           data: [],
           backgroundColor: '#d81e5b66',
         },
-        {
-          label: 'user',
-          data: [],
-          backgroundColor: '#28666e66',
-        }
       ],
-    };
-
-    const legendConfig = {
-      display: false,
+    },
+    options: {
+      title: { display: false, },
+      scales: {
+        xAxes: [{
+          gridLines: {
+            display: false,
+          },
+        }],
+        yAxes: [{
+          gridLines: {
+            display: false,
+          },
+          ticks: {
+            display: false,
+          },
+        }],
+      },
+      legend: { display: false, },
+      maintainAspectRatio: false,
     }
+  }
 
-    const stdCanvas = document.getElementById(`standard_${type}`);
-    charts.standard[type] = new Chart(stdCanvas, {
-      type: 'line',
-      data: initialData,
-      options: {
-        title: {
-          display: true,
-          // text: `Standard ${type}`,
-        },
-        scales: scaleConfig,
-        legend: legendConfig,
-
-      maintainAspectRatio: false,
-      }
+  chartTypes.map((chartType) => {
+    types.map((type) => {
+      const canvas = document.getElementById(`${chartType}_${type}`);
+      charts[chartType][type] = new Chart(canvas, config);
     });
-
-    const filCanvas = document.getElementById(`filtered_${type}`);
-    charts.filtered[type] = new Chart(filCanvas, {
-      type: 'line',
-      data: initialData,
-      options: {
-        title: {
-          display: true,
-          // text: `Filtered ${type}`,
-        },
-        scales: scaleConfig,
-        legend: legendConfig,
-
-      maintainAspectRatio: false,
-      }
-    });
-    return type;
   });
 }
 
@@ -221,54 +241,50 @@ function populateChartWithResponse(chart, label="", datasetLabel, data) {
   chart.update();
 }
 
+function initialiseControls() {
+  detectors.map((detector) => {
+    if (!(detector in controls)) return;
+    
+    controlTypes.map((controlType) => {
+      if(!(controlType in controls[detector])) return;
+
+      if (controlType === 'checkbox') {
+        const controlId = `${detector}_${controlType}`;
+        const labelId = `${detector}_${controlType}_label`;
+        controls[detector][controlType] = document.getElementById(controlId);
+        controls[detector].label[controlType] = document.getElementById(labelId);
+        return;
+      } 
+
+      if (controlType === 'slider') {
+        sliderTypes.map((sliderType) => {
+          if(!(sliderType in controls[detector][controlType])) return;
+
+          const controlId = `${detector}_${controlType}_${sliderType}`;
+          const labelId = `${controlId}_label`;
+
+          const slider = document.getElementById(controlId);
+          const label = document.getElementById(labelId);
+
+          label.innerHTML = slider.value;
+          slider.oninput = () => { label.innerHTML = slider.value };
+
+          controls[detector][controlType][sliderType] = slider;
+          controls[detector].label[sliderType] = label;
+        });
+        return;
+      }
+    });
+  });
+}
+
 window.onload = function () {
-  Chart.defaults.global.elements.point.radius = 0;
-  Chart.defaults.global.elements.point.hitRadius = 3;
   initialiseCharts();
+  initialiseControls();
 
   passwordField = document.getElementById('passwordField');
   usernameField = document.getElementById('usernameField');
   passwordField.value = '';
-
-  stdThreshSlider = document.getElementById('standardThresholdSlider');
-  stdThreshLabel = document.getElementById('standardThresholdLabel');
-  stdThreshLabel.innerHTML = stdThreshSlider.value;
-  stdThreshSlider.oninput =function() {
-    stdThreshLabel.innerHTML = stdThreshSlider.value;
-  }
-
-  stdSdSlider = document.getElementById('standardSdSlider');
-  stdSdLabel = document.getElementById('standardSdLabel');
-  stdSdLabel.innerHTML = stdSdSlider.value;
-  stdSdSlider.oninput =function() {
-    stdSdLabel.innerHTML = stdSdSlider.value;
-  }
-
-  filThreshSlider = document.getElementById('filteredThresholdSlider');
-  filThreshLabel = document.getElementById('filteredThresholdLabel');
-  filThreshLabel.innerHTML = filThreshSlider.value;
-  filThreshSlider.oninput =function() {
-    filThreshLabel.innerHTML = filThreshSlider.value;
-  }
-
-  filSdSlider = document.getElementById('filteredSdSlider');
-  filSdLabel = document.getElementById('filteredSdLabel');
-  filSdLabel.innerHTML = filSdSlider.value;
-  filSdSlider.oninput =function() {
-    filSdLabel.innerHTML = filSdSlider.value;
-  }
-
-  mahThreshSlider = document.getElementById('mahalanobisThresholdSlider');
-  mahThreshLabel = document.getElementById('mahalanobisThresholdLabel');
-  mahThreshLabel.innerHTML = mahThreshSlider.value;
-  mahThreshSlider.oninput =function() {
-    mahThreshLabel.innerHTML = mahThreshSlider.value;
-  }
-
-
-  stdCheckbox = document.getElementById('standardCheckbox');
-  filCheckbox = document.getElementById('filteredCheckbox');
-  mahCheckbox = document.getElementById('mahalanobisCheckbox');
 
   passwordField.addEventListener('keydown', this.keydownEvent);
   passwordField.addEventListener('keyup', this.keyupEvent);
