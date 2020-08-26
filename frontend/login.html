@@ -15,7 +15,6 @@
 
 <body>
   <div class="container">
-    <div class="leftContainer">
       <div class="loginTableRow">
         <div class="card fieldsContainer">
           <h1>Login</h1>
@@ -30,9 +29,13 @@
               <th>Standard</th>
               <th>Filtered</th>
               <th>Mahalanobis</th>
+              <th>Standard (Full)</th>
+              <th>Filtered (Full)</th>
             </tr>
             <tr>
               <th>Enabled</th>
+              <td></td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -42,15 +45,21 @@
               <td></td>
               <td></td>
               <td></td>
+              <td></td>
+              <td></td>
             </tr>
             <tr>
               <th>SD Multiplier</th>
               <td></td>
               <td></td>
-              <td>NA</td>
+              <td></td>
+              <td></td>
+              <td></td>
             </tr>
             <tr>
-              <th>Score</th>
+              <th>Score/Distance</th>
+              <td></td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -60,28 +69,16 @@
               <td></td>
               <td></td>
               <td></td>
+              <td></td>
+              <td></td>
             </tr>
             <tr>
               <th>Attempt Accepted</th>
-              <th colspan="3"></th>
+              <th colspan="5"></th>
             </tr>
           </table>
         </div>
 
-        <div class="card mahalanobisContainer">
-          <div class="checkboxContainer">
-            <input type="checkbox" id="mahalanobis_checkbox">
-            <label>Use Mahalanobis</label>
-          </div>
-  
-          <div class="sliders">
-            <div class="sliderContainer">
-              <label>Mahalanobis Threshold</label>
-              <input type="range" min="0" max="5" step="0.1" value="2" id="mahalanobis_slider_threshold">
-              <label id="mahalanobis_slider_threshold_label">2</label>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="standardChartsRow">
@@ -104,8 +101,8 @@
           <label>Standard full</label>
           <canvas id="standard_full"></canvas>
         </div>
-
       </div>
+
       <div class="filteredChartsRow">
         <div class="card chartContainer">
           <label>Filtered hold</label>
@@ -126,12 +123,12 @@
           <label>Filtered full</label>
           <canvas id="filtered_full"></canvas>
         </div>
-
       </div>
-    </div>
 
-    <div class="rightContainer">
-      <div class="card standardContainer">
+
+    <div class="controlsContainer">
+      <!-- Standard -->
+      <div class="card controlCard">
         <div class="checkboxContainer">
           <input type="checkbox" id="standard_checkbox" checked>
           <label>Use Standard</label>
@@ -140,7 +137,7 @@
         <div class="sliders">
           <div class="sliderContainer">
             <label>Standard SD Multiplier</label>
-            <input type="range" min="0" max="2.5" step="0.1" value="2.5" id="standard_slider_sd">
+            <input type="range" min="0" max="2.5" step="0.1" value="1.5" id="standard_slider_sd">
             <label id="standard_slider_sd_label">2.5</label>
           </div>
 
@@ -152,7 +149,8 @@
         </div>
       </div>
 
-      <div class="card filteredContainer">
+      <!-- Filtered -->
+      <div class="card controlCard">
         <div class="checkboxContainer">
           <input type="checkbox" id="filtered_checkbox">
           <label>Use Filtered</label>
@@ -161,7 +159,7 @@
         <div class="sliders">
           <div class="sliderContainer">
             <label>Filtered SD Multiplier</label>
-            <input type="range" min="0" max="2.5" step="0.1" value="2.5" id="filtered_slider_sd">
+            <input type="range" min="0" max="2.5" step="0.1" value="1.5" id="filtered_slider_sd">
             <label id="filtered_slider_sd_label">2.5</label>
           </div>
 
@@ -169,6 +167,54 @@
             <label>Filtered Threshold</label>
             <input type="range" min="1" max="100" value="65" id="filtered_slider_threshold">
             <label id="filtered_slider_threshold_label">65</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mahalanobis -->
+      <div class="card controlCard">
+        <div class="checkboxContainer">
+          <input type="checkbox" id="mahalanobis_checkbox">
+          <label>Use Mahalanobis</label>
+        </div>
+
+        <div class="sliders">
+          <div class="sliderContainer">
+            <label>Mahalanobis Threshold</label>
+            <input type="range" min="2" max="15" step="0.2" value="4" id="mahalanobis_slider_threshold">
+            <label id="mahalanobis_slider_threshold_label">2</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Standard -->
+      <div class="card controlCard">
+        <div class="checkboxContainer">
+          <input type="checkbox" id="fullStandard_checkbox">
+          <label>Use Standard (Full)</label>
+        </div>
+
+        <div class="sliders">
+          <div class="sliderContainer">
+            <label>Standard (Full) Threshold</label>
+            <input type="range" min="0" max="2" step="0.1" value="1" id="fullStandard_slider_threshold">
+            <label id="fullStandard_slider_threshold_label">2</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Filtered -->
+      <div class="card controlCard">
+        <div class="checkboxContainer">
+          <input type="checkbox" id="fullFiltered_checkbox">
+          <label>Use Filtered (Full)</label>
+        </div>
+
+        <div class="sliders">
+          <div class="sliderContainer">
+            <label>Filtered (Full) Threshold</label>
+            <input type="range" min="0" max="5" step="0.1" value="1" id="fullFiltered_slider_threshold">
+            <label id="fullFiltered_slider_threshold_label">2</label>
           </div>
         </div>
       </div>

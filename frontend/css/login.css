@@ -41,19 +41,14 @@ div {
   font-family: barlow;
 }
 
-.leftContainer {
-  flex-grow: 3;
+.container {
   flex-direction: column;
 }
 
 .loginTableRow {
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
-.rightContainer {
-  flex-grow: 1;
-  flex-direction: column;
-}
 
 
 table, tr, td, th {
@@ -108,9 +103,13 @@ tr td {
   font-family: barlow;
 }
 
-.standardContainer, .filteredContainer, .mahalanobisContainer {
+.controlsContainer {
+  justify-content: space-between;
+}
+
+.controlCard {
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -145,5 +144,5 @@ tr td {
   text-align: center;
   position: relative;
   height: 100px;
-  width: 17vw;
+  width: 21vw;
 }
