@@ -11,7 +11,7 @@ const MAHALANOBIS_THRESHOLD = 2;
 const FULL_STANDARD_THRESHOLD = 1;
 const FULL_FILTERED_THRESHOLD = 1;
 
-const MAHALANOBIS_NORM_MULTIPLIER = 1;
+const MAHALANOBIS_NORM_MULTIPLIER = 10000;
 const STANDARD_NORM_MULTIPLIER = 1000;
 const FILTERED_NORM_MULTIPLIER = 1000;
 const TYPES = ['hold', 'flight', 'dd', 'full'];
@@ -46,7 +46,13 @@ const mahalanobis = (attempt, mean, covMatrix) => {
   // Wikipedia uses a column vector, we use a row vector
   // Thus, transpose is on the right and not left (like on Wiki)
 
-  const sInv = math.inv(covMatrix);
+  let sInv;
+  try {
+    sInv = math.inv(covMatrix);
+  } catch (err) {
+    return NaN;
+  }
+
   const diffVector = attempt.map((v, i) => v - mean[i]);
   const transDiffVector = diffVector.map((v) => [v]);
 
@@ -397,7 +403,7 @@ const processMahalanobis = ({
     );
 
     scores.normedDistance[type] = normedDistance;
-    if (distance <= mahalanobisThreshold) {
+    if (normedDistance <= mahalanobisThreshold) {
       scores.inRange[type] = true;
     }
 
