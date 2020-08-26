@@ -9,10 +9,18 @@ const chartTypes = ['standard', 'filtered'];
 const types = ['hold', 'flight', 'dd', 'full'];
 
 // For controls
-const detectors = ['standard', 'filtered', 'mahalanobis'];
+const detectors = ['standard', 'filtered', 'mahalanobis', 'fullStandard', 'fullFiltered'];
 const controlTypes = ['checkbox', 'slider'];
 const sliderTypes = ['threshold', 'sd'];
 const labelTypes = ['checkbox', 'threshold', 'sd'];
+
+const responseKeys = {
+  standard: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
+  filtered: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
+  mahalanobis: ['use', 'threshold', '', 'distance.full', 'inRange.full'],
+  fullStandard: ['use', 'threshold', '', 'normedDistance.full', 'inRange.full'],
+  fullFiltered: ['use', 'threshold', '', 'normedDistance.full', 'inRange.full'],
+};
 
 const charts = chartTypes.reduce((a, v) => ({
   ...a,
@@ -56,7 +64,43 @@ const controls = {
       checkbox: undefined,
     },
   },
+  fullStandard: {
+    slider: {
+      threshold: undefined,
+    },
+    checkbox: undefined,
+    label: {
+      threshold: undefined,
+      checkbox: undefined,
+    },
+  },
+  fullFiltered: {
+    slider: {
+      threshold: undefined,
+    },
+    checkbox: undefined,
+    label: {
+      threshold: undefined,
+      checkbox: undefined,
+    },
+  },
 };
+
+Object.byString = function(o, s) {
+  if (s === '') return null;
+  s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+  s = s.replace(/^\./, '');           // strip a leading dot
+  var a = s.split('.');
+  for (var i = 0, n = a.length; i < n; ++i) {
+      var k = a[i];
+      if (k in o) {
+          o = o[k];
+      } else {
+          return;
+      }
+  }
+  return o;
+}
 
 function clearData() {
   passwordField.value = '';
@@ -96,20 +140,28 @@ function keyupEvent(e) {
   if (details.code === 'Enter') sendToServer();
 }
 
+
+
 function sendToServer() {
   var data = {
     username: usernameField.value,
     password: passwordField.value,
     keydown: keydownArray,
     keyup: keyupArray,
+
     useStandard: controls.standard.checkbox.checked,
+    useFullStandard: controls.fullStandard.checkbox.checked,
     useFiltered: controls.filtered.checkbox.checked,
+    useFullFiltered: controls.fullFiltered.checkbox.checked,
     useMahalanobis: controls.mahalanobis.checkbox.checked,
+
     standardThreshold: Number(controls.standard.slider.threshold.value),
     filteredThreshold: Number(controls.filtered.slider.threshold.value),
-    mahalanobisDistanceThreshold: Number(controls.mahalanobis.slider.threshold.value),
-    standardSdThreshold: Number(controls.standard.slider.sd.value),
-    filteredSdThreshold: Number(controls.filtered.slider.sd.value),
+    fullStandardThreshold: Number(controls.fullStandard.slider.threshold.value),
+    fullFilteredThreshold: Number(controls.fullFiltered.slider.threshold.value),
+    mahalanobisThreshold: Number(controls.mahalanobis.slider.threshold.value),
+    standardSdMultiplier: Number(controls.standard.slider.sd.value),
+    filteredSdMultiplier: Number(controls.filtered.slider.sd.value),
   };
 
   clearData();
@@ -125,29 +177,31 @@ function sendToServer() {
     if(res.ok) {
       let response = await res.json();
 
-      const stdKeys = ['useStandard', 'standardThreshold', 'standardSDMultiplier', 'standardScore', 'standardAccepted'];
-      const filKeys = ['useFiltered', 'filteredThreshold', 'filteredSDMultiplier', 'filteredScore', 'filteredAccepted'];
-      const mahKeys = ['useMahalanobis', 'mahalanobisThreshold', '', 'mahalanobisDistance', 'mahalanobisAccepted'];
-
       const table = document.getElementById('dataTable');
-      Array.from(table.getElementsByTagName('tr')).map((row, i) => {
-        if (i === 0) return;
-        if (i === stdKeys.length + 1) {
-          row.getElementsByTagName('th')[1].innerHTML = response.accepted;
-          return;
-        }
-        const cells = row.getElementsByTagName('td');
-        cells[0].innerHTML = response[stdKeys[i - 1]];
-        cells[1].innerHTML = response[filKeys[i - 1]];
 
-        if (i != 3) {
-          cells[2].innerHTML = response[mahKeys[i - 1]];
-        }
+      detectors.map((detector, detectorIndex) => {
+        const data = response.result[detector];
+        const keys = responseKeys[detector];
+
+        Array.from(table.getElementsByTagName('tr')).map((row, i) => {
+          const index = i - 1;
+          if (i === 0) return;
+          if (i === keys.length + 1) {
+            row.getElementsByTagName('th')[1].innerHTML = response.result.accepted;
+            return;
+          }
+
+          const cells = row.getElementsByTagName('td');
+          const value = Object.byString(data, keys[index]) ?? '-';
+          const cellValue = (typeof value == 'number') ? value.toFixed(2) : value;
+          
+          cells[detectorIndex].innerHTML = cellValue;
+        });
       });
 
       types.map((type) => {
         populateChart(charts.standard[type], response.db[type], response.attempt[type]);
-        populateChart(charts.filtered[type], response.db[type], response.attempt[type]);
+        populateChart(charts.filtered[type], response.filteredDb[type], response.attempt[type]);
       });
     }
   });
