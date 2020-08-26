@@ -49,48 +49,10 @@ div {
   justify-content: space-around;
 }
 
-
-
-table, tr, td, th {
-  border-collapse: collapse;
-  background-color: var(--elevation00dp);
-}
-
-td, th {
-  padding: 0.2rem 0.4rem;
-  border-right: 1px solid var(--text-disabled);
-}
-
-th:last-child, td:last-child, tr:last-child th { 
-  border: none;
-}
-
-tr:last-child {
-  border-top: 1px solid var(--text-disabled);
-}
-
-tr th:first-child {
-  text-align: right;
-}
-
-tr td {
-  text-align: center;
-}
-
-.card {
-  border-radius: 7px;
-  padding: 0.7rem;
-  margin: 0.5rem;
-  background-color: var(--elevation02dp);
-}
-
-.tableContainer {
-  display: inline-flex;
-}
-
 .fieldsContainer {
   flex-direction: column;
   justify-content: space-between;
+  /* flex-grow: 1; */
 }
 
 .fieldsContainer input {
@@ -101,6 +63,83 @@ tr td {
   background-color: var(--elevation04dp);
   border: 1px solid black;
   font-family: barlow;
+}
+
+.details {
+  flex-direction: column;
+  /* flex-grow: 2; */
+}
+
+.details h3 {
+  margin: 0.1rem;
+}
+
+.detailSubCard {
+  flex-direction: column;
+  /* align-items: ; */
+  justify-content: space-evenly;
+  border-radius: 7px;
+  padding: 0.2rem;
+  margin: 0.2rem;
+  background-color: var(--elevation04dp);
+}
+
+.detailSubCard p {
+  margin: 0.1rem;
+}
+
+.tableContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* flex-grow: 4; */
+}
+
+table, tr, td, th {
+  border-collapse: collapse;
+  background-color: var(--elevation00dp);
+}
+
+td, th {
+  padding: 0.2rem 0.4rem;
+}
+
+.details tr:not(:last-child) td, 
+.details tr:not(:last-child) th {
+  border-bottom: 1px solid var(--text-disabled);
+}
+
+.tableContainer td, .tableContainer th {
+  border-right: 1px solid var(--text-disabled);
+}
+
+.tableContainer th:last-child, 
+.tableContainer td:last-child, 
+.tableContainer tr:last-child th { 
+  border: none;
+}
+
+.tableContainer tr:first-child {
+  border-bottom: 1px solid var(--text-disabled);
+}
+
+.tableContainer tr:last-child {
+  border-top: 1px solid var(--text-disabled);
+}
+
+.tableContainer tr th:first-child {
+  text-align: right;
+}
+
+.tableContainer tr td {
+  text-align: center;
+}
+
+.card {
+  border-radius: 7px;
+  padding: 0.7rem;
+  margin: 0.5rem;
+  background-color: var(--elevation02dp);
 }
 
 .controlsContainer {

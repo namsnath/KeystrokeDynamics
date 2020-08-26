@@ -18,8 +18,47 @@
       <div class="loginTableRow">
         <div class="card fieldsContainer">
           <h1>Login</h1>
-          <input id='usernameField' placeholder='Username'>
-          <input id='passwordField' placeholder='Password'>
+          Press enter after your password to submit.
+          <br>
+          Enter is considered in the keystroke features.
+          <div class="fieldsContainer">
+            <input id='usernameField' placeholder='Username'>
+            <input id='passwordField' placeholder='Password'>
+          </div>
+        </div>
+
+        <div class="card details">
+          <h3>Individual</h3>
+          <div class="detailSubCard">
+            <table>
+              <tr>
+                <th>Standard</th>
+                <td>Manhattan distance of each feature from mean</td>
+              </tr>
+              <tr>
+                <th>Filtered</th>
+                <td>Values in range (mean ± 2∗sd) used as population mean</td>
+              </tr>
+            </table>
+          </div>
+
+          <h3>Full</h3>
+          <div class="detailSubCard">
+            <table>
+              <tr>
+                <th>Standard</th>
+                <td>Manhattan distance of attempt vector from population mean vector</td>
+              </tr>
+              <tr>
+                <th>Filtered</th>
+                <td>Values in range (mean ± 2∗sd) used as population mean</td>
+              </tr>
+              <tr>
+                <th>Mahalanobis</th>
+                <td>Mahalanobis distance using a covariance matrix of all features</td>
+              </tr>
+            </table>
+          </div>
         </div>
 
         <div class="card tableContainer">
