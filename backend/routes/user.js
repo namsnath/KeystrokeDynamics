@@ -101,13 +101,13 @@ router.post('/login', async (req, res) => {
   const result = processAttempt({
     userKeystrokeData: userInDb.keystrokeData,
     attemptKeystrokeData: processedAttempt,
+    ...req.body,
   });
 
   if (result.accepted) {
     const newUserData = addAttemptToKeystrokeData({
       userData: userInDb,
       attemptKeystrokeData: processedAttempt,
-      ...req.body,
     });
     newUserData.__v += 1;
 

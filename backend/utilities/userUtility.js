@@ -504,7 +504,7 @@ const processAttempt = ({
       inRange: {},
     },
     fullStandard: {
-      use: useStandard,
+      use: useFullStandard,
       threshold: fullStandardThreshold,
       distance: {},
       inRange: {},
@@ -517,7 +517,7 @@ const processAttempt = ({
       inRange: {},
     },
     fullFiltered: {
-      use: useFiltered,
+      use: useFullFiltered,
       threshold: fullFilteredThreshold,
       distance: {},
       inRange: {},
