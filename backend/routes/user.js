@@ -7,10 +7,9 @@ const {
   signUpNewUser,
   updateUser,
   createSignupDataFromProcessedData,
-  calculateAttemptScores,
-  verifyAttempt,
   addAttemptToKeystrokeData,
   computeDataTendencies,
+  processAttempt,
 } = require('../utilities/userUtility');
 
 const router = express.Router();
@@ -79,14 +78,6 @@ router.post('/login', async (req, res) => {
     keydown,
     keyup,
     username,
-    standardSdThreshold,
-    standardThreshold,
-    filteredSdThreshold,
-    filteredThreshold,
-    mahalanobisDistanceThreshold,
-    useStandard = true,
-    useFiltered = false,
-    useMahalanobis = false,
   } = req.body;
 
   const processedAttempt = processKeystrokeData({ keydown, keyup });
@@ -107,33 +98,16 @@ router.post('/login', async (req, res) => {
     return res.status(403).json({ success: false, msg: 'Invalid Credentials' });
   }
 
-  const scores = calculateAttemptScores({
+  const result = processAttempt({
     userKeystrokeData: userInDb.keystrokeData,
     attemptKeystrokeData: processedAttempt,
-    standardSdThreshold,
-    filteredSdThreshold,
-    mahalanobisDistanceThreshold,
-  });
-
-  const {
-    standardSdThreshold: standardSDMultiplier,
-    filteredSdThreshold: filteredSDMultiplier,
-    mahalanobisDistanceThreshold: mahalanobisThreshold,
-  } = scores;
-
-  const result = verifyAttempt({
-    scores,
-    useStandard,
-    useFiltered,
-    useMahalanobis,
-    standardThreshold,
-    filteredThreshold,
   });
 
   if (result.accepted) {
     const newUserData = addAttemptToKeystrokeData({
       userData: userInDb,
       attemptKeystrokeData: processedAttempt,
+      ...req.body,
     });
     newUserData.__v += 1;
 
@@ -144,10 +118,7 @@ router.post('/login', async (req, res) => {
   }
 
   return res.json({
-    mahalanobisThreshold,
-    standardSDMultiplier,
-    filteredSDMultiplier,
-    ...result,
+    result,
     db: {
       hold: userInDb.keystrokeData.hold.means,
       flight: userInDb.keystrokeData.flight.means,

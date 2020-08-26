@@ -5,6 +5,17 @@ const { logger } = require('./loggers');
 
 const User = require('../models/User');
 
+const SD_MULTIPLIER = 2.5;
+const THRESHOLD_PERCENT = 65;
+const MAHALANOBIS_THRESHOLD = 2;
+const FULL_STANDARD_THRESHOLD = 1;
+const FULL_FILTERED_THRESHOLD = 1;
+
+const MAHALANOBIS_NORM_MULTIPLIER = 1;
+const STANDARD_NORM_MULTIPLIER = 1000;
+const FILTERED_NORM_MULTIPLIER = 1000;
+const TYPES = ['hold', 'flight', 'dd', 'full'];
+
 const matrixMult = (a, b) => {
   if (!a[0].length) a = [a];
   if (!b[0].length) b = [b];
@@ -23,6 +34,8 @@ const matrixMult = (a, b) => {
 const confidence = (mean, sd, n, c = 0.95) => {
 
 };
+
+const norm = (a) => Math.sqrt(ss.sum(a.map((v) => v ** 2)));
 
 const euclidean = (d1, d2, w = 1) => Math.sqrt(w * (Math.abs(d2 - d1) ** 2));
 
@@ -135,8 +148,12 @@ const computeFilteredTendencies = (data, SDFilterMultiplier = 2) => {
       ),
     );
 
-  const filteredMeans = data.filteredMeans.map((v, i) => ss.mean(transposedData[i]));
-  const filteredSd = data.filteredSd.map((v, i) => ss.standardDeviation(transposedData[i]));
+  const filteredMeans = data.filteredMeans.map(
+    (v, i) => ss.mean(transposedData[i].length === 0 ? [0] : transposedData[i]),
+  );
+  const filteredSd = data.filteredSd.map(
+    (v, i) => ss.standardDeviation(transposedData[i].length === 0 ? [0] : transposedData[i]),
+  );
 
   return { filteredMeans, filteredSd };
 };
@@ -162,9 +179,7 @@ const computeMahalanobis = (data, means) => {
 };
 
 const computeDataTendencies = (keystrokeData) => {
-  const types = ['hold', 'flight', 'dd', 'full'];
-
-  types.map((type) => {
+  TYPES.map((type) => {
     const { means, sd } = computeStandardTendencies(keystrokeData[type]);
     keystrokeData[type].means = means;
     keystrokeData[type].sd = sd;
@@ -196,9 +211,7 @@ const createSignupDataFromProcessedData = (username, passwords, processedData) =
   };
 
   signupData = processedData.reduce((acc, v, i) => {
-    const types = ['hold', 'flight', 'dd', 'full'];
-
-    types.map((type) => {
+    TYPES.map((type) => {
       if (i === 0) {
         // Keys of the processed data is checked for equality
         // So the first one is used for the dataset
@@ -246,9 +259,7 @@ const updateUser = ({
 const addAttemptToKeystrokeData = ({
   userData, attemptKeystrokeData,
 }) => {
-  const types = ['hold', 'flight', 'dd', 'full'];
-
-  types.map((type) => {
+  TYPES.map((type) => {
     userData.keystrokeData[type].times.push(attemptKeystrokeData[type].times);
     return type;
   });
@@ -261,134 +272,47 @@ const addAttemptToKeystrokeData = ({
   return userData;
 };
 
-const calculateStandardScores = ({
+const processStandard = ({
   userKeystrokeData,
   attemptKeystrokeData,
-  sdThreshold = 2.5,
+  standardSdMultiplier = SD_MULTIPLIER,
+  standardThreshold = THRESHOLD_PERCENT,
 }) => {
-  const types = ['hold', 'flight', 'dd', 'full'];
   const scores = {
     distance: {},
-    low: {},
-    high: {},
-    inrange: {},
-    inrangeCount: {},
-    totalCount: {},
-    inrangePercent: {},
-    distanceSum: {},
+    inRange: {},
+    inRangePercent: {},
   };
 
-  types.map((type) => {
+  TYPES.map((type) => {
     scores.distance[type] = Array(userKeystrokeData[type].means.length).fill(0);
-    scores.low[type] = Array(userKeystrokeData[type].means.length).fill(0);
-    scores.high[type] = Array(userKeystrokeData[type].means.length).fill(0);
-    scores.inrange[type] = Array(userKeystrokeData[type].means.length).fill(0);
-    scores.distanceSum[type] = 0;
-    scores.inrangeCount[type] = 0;
-    scores.totalCount[type] = 0;
-    scores.inrangePercent[type] = 0;
+    const isInRange = Array(userKeystrokeData[type].means.length).fill(false);
+    let inRangeCount = 0;
+    let totalCount = 0;
+    scores.inRangePercent[type] = 0;
+    scores.inRange[type] = false;
 
     userKeystrokeData[type].means.map((v, i) => {
       const mean = userKeystrokeData[type].means[i];
       const sd = userKeystrokeData[type].sd[i];
       const attemptTime = attemptKeystrokeData[type].times[i];
 
-      scores.distance[type][i] = cityblock(mean, attemptTime);
-      scores.distanceSum[type] += cityblock(mean, attemptTime);
-      scores.low[type][i] = mean - (sd * sdThreshold);
-      scores.high[type][i] = mean + (sd * sdThreshold);
-      scores.inrange[type][i] = attemptTime >= scores.low[type][i]
-        && attemptTime <= scores.high[type][i];
+      const low = mean - (sd * standardSdMultiplier);
+      const high = mean + (sd * standardSdMultiplier);
 
-      scores.inrangeCount[type] += !!scores.inrange[type][i];
-      scores.totalCount[type] += 1;
+      const distance = cityblock(mean, attemptTime);
+
+      scores.distance[type][i] = distance;
+      isInRange[i] = attemptTime >= low && attemptTime <= high;
+
+      inRangeCount += !!isInRange[i];
+      totalCount += 1;
       return v;
     });
 
-    scores.inrangePercent[type] = (scores.inrangeCount[type] / scores.totalCount[type]) * 100;
-
-    return type;
-  });
-
-  return scores;
-};
-
-const calculateFilteredScores = ({
-  userKeystrokeData,
-  attemptKeystrokeData,
-  sdThreshold = 2.5,
-}) => {
-  const types = ['hold', 'flight', 'dd', 'full'];
-  const scores = {
-    distance: {},
-    low: {},
-    high: {},
-    inrange: {},
-    inrangeCount: {},
-    totalCount: {},
-    inrangePercent: {},
-    distanceSum: {},
-  };
-
-  types.map((type) => {
-    scores.distance[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
-    scores.low[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
-    scores.high[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
-    scores.inrange[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
-    scores.distanceSum[type] = 0;
-    scores.inrangeCount[type] = 0;
-    scores.totalCount[type] = 0;
-    scores.inrangePercent[type] = 0;
-
-    userKeystrokeData[type].filteredMeans.map((v, i) => {
-      const mean = userKeystrokeData[type].filteredMeans[i];
-      const sd = userKeystrokeData[type].filteredSd[i];
-      const attemptTime = attemptKeystrokeData[type].times[i];
-
-      scores.distance[type][i] = cityblock(mean, attemptTime);
-      scores.distanceSum[type] += cityblock(mean, attemptTime);
-      scores.low[type][i] = mean - (sd * sdThreshold);
-      scores.high[type][i] = mean + (sd * sdThreshold);
-      scores.inrange[type][i] = attemptTime >= scores.low[type][i]
-        && attemptTime <= scores.high[type][i];
-
-      scores.inrangeCount[type] += !!scores.inrange[type][i];
-      scores.totalCount[type] += 1;
-      return v;
-    });
-
-    scores.inrangePercent[type] = (scores.inrangeCount[type] / scores.totalCount[type]) * 100;
-
-    return type;
-  });
-
-  return scores;
-};
-
-const calculateMahalanobisScores = ({
-  userKeystrokeData,
-  attemptKeystrokeData,
-  distanceThreshold = 2,
-}) => {
-  const types = ['hold', 'flight', 'dd', 'full'];
-  const scores = {
-    distance: {},
-    inrange: {},
-  };
-
-  types.map((type) => {
-    scores.distance[type] = 0;
-    scores.inrange[type] = false;
-
-    const distance = mahalanobis(
-      attemptKeystrokeData[type].times,
-      userKeystrokeData[type].means,
-      userKeystrokeData[type].covMatrix,
-    );
-
-    scores.distance[type] = distance;
-    if (distance <= distanceThreshold) {
-      scores.inrange[type] = true;
+    scores.inRangePercent[type] = (inRangeCount / totalCount) * 100;
+    if (scores.inRangePercent[type] >= standardThreshold) {
+      scores.inRange[type] = true;
     }
 
     return type;
@@ -397,78 +321,259 @@ const calculateMahalanobisScores = ({
   return scores;
 };
 
-const calculateAttemptScores = ({
+const processFiltered = ({
   userKeystrokeData,
   attemptKeystrokeData,
-  standardSdThreshold = 2.5,
-  filteredSdThreshold = 2.5,
-  mahalanobisDistanceThreshold = 2,
+  filteredSdMultiplier = SD_MULTIPLIER,
+  filteredThreshold = THRESHOLD_PERCENT,
 }) => {
   const scores = {
-    standard: {},
-    filtered: {},
-    mahalanobis: {},
-    standardSdThreshold,
-    filteredSdThreshold,
-    mahalanobisDistanceThreshold,
+    distance: {},
+    inRange: {},
+    inRangePercent: {},
   };
 
-  scores.standard = calculateStandardScores({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    sdThreshold: standardSdThreshold,
-  });
+  TYPES.map((type) => {
+    scores.distance[type] = Array(userKeystrokeData[type].filteredMeans.length).fill(0);
+    const isInRange = Array(userKeystrokeData[type].filteredMeans.length).fill(false);
+    let inRangeCount = 0;
+    let totalCount = 0;
+    scores.inRangePercent[type] = 0;
+    scores.inRange[type] = false;
 
-  scores.filtered = calculateFilteredScores({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    sdThreshold: filteredSdThreshold,
-  });
+    userKeystrokeData[type].filteredMeans.map((v, i) => {
+      const mean = userKeystrokeData[type].filteredMeans[i];
+      const sd = userKeystrokeData[type].filteredSd[i];
+      const attemptTime = attemptKeystrokeData[type].times[i];
 
-  scores.mahalanobis = calculateMahalanobisScores({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    distanceThreshold: mahalanobisDistanceThreshold,
+      const low = mean - (sd * filteredSdMultiplier);
+      const high = mean + (sd * filteredSdMultiplier);
+
+      const distance = cityblock(mean, attemptTime);
+
+      scores.distance[type][i] = distance;
+      isInRange[i] = attemptTime >= low && attemptTime <= high;
+
+      inRangeCount += !!isInRange[i];
+      totalCount += 1;
+      return v;
+    });
+
+    scores.inRangePercent[type] = (inRangeCount / totalCount) * 100;
+    if (scores.inRangePercent[type] >= filteredThreshold) {
+      scores.inRange[type] = true;
+    }
+
+    return type;
   });
 
   return scores;
 };
 
-const verifyAttempt = ({
-  scores,
-  useStandard = true,
-  useFiltered = false,
-  useMahalanobis = false,
-  standardThreshold = 65,
-  filteredThreshold = 65,
+const processMahalanobis = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  mahalanobisThreshold = MAHALANOBIS_THRESHOLD,
 }) => {
-  const {
-    standard: { inrangePercent: { full: standardScore } },
-    filtered: { inrangePercent: { full: filteredScore } },
-    mahalanobis: {
-      inrange: { full: mahalanobisInrange },
-      distance: { full: mahalanobisDistance },
-    },
-  } = scores;
-
-  const standardAccepted = !useStandard || (standardScore >= standardThreshold);
-  const filteredAccepted = !useFiltered || (filteredScore >= filteredThreshold);
-  const mahalanobisAccepted = !useMahalanobis || mahalanobisInrange;
-
-  const result = {
-    useStandard,
-    standardScore,
-    standardThreshold,
-    standardAccepted,
-    useFiltered,
-    filteredScore,
-    filteredThreshold,
-    filteredAccepted,
-    useMahalanobis,
-    mahalanobisDistance,
-    mahalanobisAccepted,
-    accepted: standardAccepted && filteredAccepted && mahalanobisAccepted,
+  const scores = {
+    normedDistance: {},
+    distance: {},
+    inRange: {},
   };
+
+  TYPES.map((type) => {
+    scores.distance[type] = 0;
+    scores.inRange[type] = false;
+
+    const distance = mahalanobis(
+      attemptKeystrokeData[type].times,
+      userKeystrokeData[type].means,
+      userKeystrokeData[type].covMatrix,
+    );
+    scores.distance[type] = distance;
+
+    const normedDistance = (distance * MAHALANOBIS_NORM_MULTIPLIER) / (
+      norm(attemptKeystrokeData[type].times) * norm(userKeystrokeData[type].means)
+    );
+
+    scores.normedDistance[type] = normedDistance;
+    if (distance <= mahalanobisThreshold) {
+      scores.inRange[type] = true;
+    }
+
+    return type;
+  });
+
+  return scores;
+};
+
+const processFullStandard = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  fullStandardThreshold = FULL_STANDARD_THRESHOLD,
+}) => {
+  const scores = {
+    normedDistance: {},
+    distance: {},
+    inRange: {},
+  };
+
+  TYPES.map((type) => {
+    scores.distance[type] = 0;
+    scores.inRange[type] = false;
+
+    const distance = cityblockArray(
+      attemptKeystrokeData[type].times,
+      userKeystrokeData[type].means,
+    );
+    scores.distance[type] = distance;
+
+    const normedDistance = (distance * STANDARD_NORM_MULTIPLIER) / (
+      norm(attemptKeystrokeData[type].times) * norm(userKeystrokeData[type].means)
+    );
+
+    scores.normedDistance[type] = normedDistance;
+    if (normedDistance <= fullStandardThreshold) {
+      scores.inRange[type] = true;
+    }
+
+    return type;
+  });
+
+  return scores;
+};
+
+const processFullFiltered = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  fullFilteredThreshold = FULL_FILTERED_THRESHOLD,
+}) => {
+  const scores = {
+    normedDistance: {},
+    distance: {},
+    inRange: {},
+  };
+
+  TYPES.map((type) => {
+    scores.distance[type] = 0;
+    scores.inRange[type] = false;
+
+    const distance = cityblockArray(
+      attemptKeystrokeData[type].times,
+      userKeystrokeData[type].filteredMeans,
+    );
+    scores.distance[type] = distance;
+
+    const normedDistance = (distance * FILTERED_NORM_MULTIPLIER) / (
+      norm(attemptKeystrokeData[type].times) * norm(userKeystrokeData[type].filteredMeans)
+    );
+
+    scores.normedDistance[type] = normedDistance;
+    if (normedDistance <= fullFilteredThreshold) {
+      scores.inRange[type] = true;
+    }
+
+    return type;
+  });
+
+  return scores;
+};
+
+const processAttempt = ({
+  userKeystrokeData,
+  attemptKeystrokeData,
+  useStandard = true,
+  useFullStandard = true,
+  useFiltered = true,
+  useFullFiltered = true,
+  useMahalanobis = false,
+  standardThreshold = THRESHOLD_PERCENT,
+  fullStandardThreshold = FULL_STANDARD_THRESHOLD,
+  fullFilteredThreshold = FULL_FILTERED_THRESHOLD,
+  filteredThreshold = THRESHOLD_PERCENT,
+  mahalanobisThreshold = MAHALANOBIS_THRESHOLD,
+  standardSdMultiplier = SD_MULTIPLIER,
+  filteredSdMultiplier = SD_MULTIPLIER,
+}) => {
+  const result = {
+    standard: {
+      use: useStandard,
+      threshold: standardThreshold,
+      sdMultiplier: standardSdMultiplier,
+      distance: {},
+      inRange: {},
+    },
+    fullStandard: {
+      use: useStandard,
+      threshold: fullStandardThreshold,
+      distance: {},
+      inRange: {},
+    },
+    filtered: {
+      use: useFiltered,
+      threshold: filteredThreshold,
+      sdMultiplier: filteredSdMultiplier,
+      distance: {},
+      inRange: {},
+    },
+    fullFiltered: {
+      use: useFiltered,
+      threshold: fullFilteredThreshold,
+      distance: {},
+      inRange: {},
+    },
+    mahalanobis: {
+      use: useMahalanobis,
+      threshold: mahalanobisThreshold,
+      distance: {},
+      inRange: {},
+    },
+    accepted: false,
+  };
+
+  const mahalanobisScores = processMahalanobis({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    mahalanobisThreshold,
+  });
+
+  const fullStandardScores = processFullStandard({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    fullStandardThreshold,
+  });
+
+  const fullFilteredScores = processFullFiltered({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    fullFilteredThreshold,
+  });
+
+  const indivStandardScores = processStandard({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    standardSdMultiplier,
+    standardThreshold,
+  });
+
+  const indivFilteredScores = processFiltered({
+    userKeystrokeData,
+    attemptKeystrokeData,
+    filteredSdMultiplier,
+    filteredThreshold,
+  });
+
+  result.mahalanobis = { ...result.mahalanobis, ...mahalanobisScores };
+  result.fullStandard = { ...result.fullStandard, ...fullStandardScores };
+  result.fullFiltered = { ...result.fullFiltered, ...fullFilteredScores };
+  result.standard = { ...result.standard, ...indivStandardScores };
+  result.filtered = { ...result.filtered, ...indivFilteredScores };
+
+  result.accepted = (!useMahalanobis || mahalanobisScores.inRange.full)
+    && (!useFullStandard || fullStandardScores.inRange.full)
+    && (!useFullFiltered || fullFilteredScores.inRange.full)
+    && (!useStandard || indivStandardScores.inRange.full)
+    && (!useFiltered || indivFilteredScores.inRange.full);
 
   return result;
 };
@@ -480,7 +585,6 @@ module.exports = {
   signUpNewUser,
   updateUser,
   addAttemptToKeystrokeData,
-  calculateAttemptScores,
-  verifyAttempt,
   computeDataTendencies,
+  processAttempt,
 };
