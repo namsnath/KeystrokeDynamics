@@ -50,6 +50,8 @@ const mahalanobis = (attempt, mean, covMatrix) => {
   try {
     sInv = math.inv(covMatrix);
   } catch (err) {
+    logger.warn('sInv is not possible');
+    logger.warn(sInv);
     return NaN;
   }
 
@@ -57,9 +59,17 @@ const mahalanobis = (attempt, mean, covMatrix) => {
   const transDiffVector = diffVector.map((v) => [v]);
 
   const leftProduct = matrixMult(diffVector, sInv);
-  const product = matrixMult(leftProduct, transDiffVector);
+  const product = Math.abs(matrixMult(leftProduct, transDiffVector));
+
+  // let distance;
+  // if (typeof product === 'number') {
+  //   distance = Math.sqrt(product);
+  // } else if (typeof product === 'object' && !!product.length) {
+  //   distance = Math.sqrt(product[0][0]);
+  // }
 
   const distance = Math.sqrt(product);
+
   return distance;
 };
 
@@ -575,7 +585,9 @@ const processAttempt = ({
   result.standard = { ...result.standard, ...indivStandardScores };
   result.filtered = { ...result.filtered, ...indivFilteredScores };
 
-  result.accepted = (!useMahalanobis || mahalanobisScores.inRange.full)
+  result.accepted = (useStandard || useFiltered || useMahalanobis
+    || useFullFiltered || useFullStandard)
+    && (!useMahalanobis || mahalanobisScores.inRange.full)
     && (!useFullStandard || fullStandardScores.inRange.full)
     && (!useFullFiltered || fullFilteredScores.inRange.full)
     && (!useStandard || indivStandardScores.inRange.full)
