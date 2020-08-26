@@ -41,6 +41,21 @@ div {
   font-family: barlow;
 }
 
+.leftContainer {
+  flex-grow: 3;
+  flex-direction: column;
+}
+
+.loginTableRow {
+  justify-content: space-between;
+}
+
+.rightContainer {
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+
 table, tr, td, th {
   border-collapse: collapse;
   background-color: var(--elevation00dp);
@@ -48,11 +63,15 @@ table, tr, td, th {
 
 td, th {
   padding: 0.2rem 0.4rem;
-  border-right: 1px solid var(--text-disabled)
+  border-right: 1px solid var(--text-disabled);
 }
 
 th:last-child, td:last-child, tr:last-child th { 
   border: none;
+}
+
+tr:last-child {
+  border-top: 1px solid var(--text-disabled);
 }
 
 tr th:first-child {
@@ -117,11 +136,14 @@ tr td {
   font-weight: bold;
 }
 
+.standardChartsRow, .filteredChartsRow {
+  justify-content: space-between;
+}
+
 .chartContainer {
   flex-direction: column;
   text-align: center;
   position: relative;
   height: 100px;
-  width: 200px;
-  border-bottom: 1px solid black;
+  width: 17vw;
 }
