@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html>
   <title>Signup</title>
+  <link rel="stylesheet" href="css/signup.css">
   <script src='js/keystrokeLogger.js'></script>
   <script src='js/signup.js'></script>
 <head>
 </head>
 
 <body>
-  <input id='usernameField' placeholder='Username'>
-  <br><br>
-  <input id='passwordField0' placeholder='Password (1/3)'>
-  <br>
-  <input id='passwordField1' placeholder='Password (2/3)'>
-  <br>
-  <input id='passwordField2' placeholder='Password (3/3)'>
+  <div class="login-box">
+    <h2>Sign up</h2>
+
+      <form>
+        <div class="user-box">
+          <input id="usernameField" type="text"  name="" required>
+          <label>Username</label>
+        </div>
+  
+        <div class="user-box">
+          <input id="passwordField0" type="password"  name="" required>
+          <label>Password (1/3)</label>
+        </div>
+  
+        <div class="user-box">
+          <input id="passwordField1" type="password" name="" required>
+          <label>Password (2/3)</label>
+        </div>
+  
+        <div class="user-box">
+          <input id="passwordField2" type="password" name="" required>
+          <label>Password (3/3)</label>
+        </div>
+      </form>
+    
+  </div>
 </body>
 
 </html>
