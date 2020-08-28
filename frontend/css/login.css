@@ -10,7 +10,7 @@
 }
 
 html {
-  --surface: #121212;
+  --surface: linear-gradient(#141e30, #243b55);
   --elevation00dp: #FFFFFF00;
   --elevation01dp: #FFFFFF0D;
   --elevation02dp: #FFFFFF12;
