@@ -32,7 +32,7 @@ html {
 }
 
 body {
-  background-color: var(--surface);
+  background: var(--surface);
   color: var(--text-high-emphasis);
 }
 
