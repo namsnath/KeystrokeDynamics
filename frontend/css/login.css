@@ -27,7 +27,8 @@ html {
   --text-high-emphasis: #FFFFFFDE;
   --text-medium-emphasis: #FFFFFF99;
   --text-disabled: #FFFFFF61;
-
+  
+  height: 100%;
   font-size: 1em;
 }
 
