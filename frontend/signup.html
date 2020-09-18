@@ -1,19 +1,40 @@
 <!DOCTYPE html>
 <html>
-  <title>Signup</title>
-  <script src='js/keystrokeLogger.js'></script>
-  <script src='js/signup.js'></script>
+<title>Signup</title>
+<link href="css/halfmoon-variables.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="css/login.css">
+<script src='js/keystrokeLogger.js'></script>
+<script src='js/signup.js'></script>
+
 <head>
 </head>
 
-<body>
-  <input id='usernameField' placeholder='Username'>
-  <br><br>
-  <input id='passwordField0' placeholder='Password (1/3)'>
-  <br>
-  <input id='passwordField1' placeholder='Password (2/3)'>
-  <br>
-  <input id='passwordField2' placeholder='Password (3/3)'>
+<body class="dark-mode with-custom-webkit-scrollbars with-custom-css-scrollbars">
+
+  <div class="page-wrapper with-navbar">
+
+    <nav class="navbar">
+      <span class="navbar-brand">Keystroke Dynamics</span>
+    </nav>
+
+    <div class="content-wrapper container-fluid overflow-auto">
+      <div class="row justify-content-center">
+        <div class="card col-3 p-20">
+          <label>Username</label>
+          <input type="text" class="form-control mb-20" id='usernameField' placeholder='Username'>
+          <hr />
+          <label>Passwords</label>
+          <input type="text" class="form-control mb-10" id='passwordField0' placeholder='Password (1/3)'>
+          <input type="text" class="form-control mb-10" id='passwordField1' placeholder='Password (2/3)'>
+          <input type="text" class="form-control mb-10" id='passwordField2' placeholder='Password (3/3)'>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/halfmoon.min.js"></script>
+
 </body>
 
 </html>
