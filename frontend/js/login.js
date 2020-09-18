@@ -216,15 +216,21 @@ function initialiseCharts() {
     data: {
       labels: [],
       datasets: [
+        // Red
         {
           label: 'user',
           data: [],
-          backgroundColor: '#28666e66',
+          backgroundColor: '#ff4d4f10',
+          borderColor: '#ff4d4f',
+          borderWidth: 2,
         },
+        // Blue
         {
           label: 'db',
           data: [],
-          backgroundColor: '#d81e5b66',
+          backgroundColor: '#1890ff10',
+          borderColor: '#1890ff',
+          borderWidth: 2,
         },
       ],
     },
