@@ -64,7 +64,10 @@ router.post('/signup', async (req, res) => {
   try {
     const newUserData = await signUpNewUser(signupData);
     logger.info(`Signed up ${username}`);
-    return res.json(newUserData);
+    return res.json({
+      success: true,
+      username: newUserData.username,
+    });
   } catch (error) {
     logger.error(error);
     logger.debug(req.body);
