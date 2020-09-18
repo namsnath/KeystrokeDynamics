@@ -57,7 +57,7 @@ function keydownEvent(e) {
 
 function keyupEvent(e) {
   let field = e.target.id;
-  let index = field.substr(field.length - 1);
+  let index = Number(field.substr(field.length - 1));
 
   let details = keyEvent(e);
   if (!details) return;
@@ -81,8 +81,16 @@ function keyupEvent(e) {
     reqdUpKeystroke.time = details.time;
 
   if (details.code === 'Enter') {
-    if (index == 2) 
+    if (index === 0) {
+      passwordFields[1].focus();
+    }
+    else if (index === 1) {
+      passwordFields[2].focus();
+    }
+    else if (index === 2) {
       sendToServer();
+      passwordFields[0].focus();
+    }
   }
 }
 
@@ -103,6 +111,24 @@ function sendToServer() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+  }).then(async (res) => {
+    const response = await res.json();
+
+    if (response.success) {
+      halfmoon.initStickyAlert({
+        content: `${response.username} signed up successfully`,
+        title: "Signup successful",
+        alertType: "alert-success",
+        fillType: "filled-lm"
+      });
+    } else {
+      halfmoon.initStickyAlert({
+        content: `${response.msg}`,
+        title: "Signup failed",
+        alertType: "alert-danger",
+        fillType: "filled-lm"
+      });
+    }
   });
 }
 
