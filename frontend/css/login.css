@@ -33,13 +33,6 @@ div {
   flex-direction: column;
 }
 
-.sliderContainer {
-  /* padding: 0.7rem; */
-  /* margin: 0.5rem; */
-  display: flex;
-  justify-content: space-evenly;
-}
-
 .checkboxContainer {
   font-weight: bold;
 }

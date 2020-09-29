@@ -4,6 +4,7 @@
 <head>
   <title>Login</title>
   <link href="css/halfmoon-variables.min.css" rel="stylesheet" />
+  <link href="../../halfmoon/css/halfmoon-variables.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/login.css">
   <script src="js/chart.min.js"></script>
   <script src='js/keystrokeLogger.js'></script>
@@ -11,9 +12,9 @@
 </head>
 
 <body class="dark-mode with-custom-webkit-scrollbars with-custom-css-scrollbars">
-  
+
   <div class="page-wrapper with-navbar">
-    
+
     <nav class="navbar">
       <span class="navbar-brand">Keystroke Dynamics</span>
     </nav>
@@ -22,16 +23,23 @@
       <div class="row">
         <div class="card col-2">
           <h1 class="card-title">Login</h1>
-          
+
           <p>Press enter after your password to submit.</p>
           <p>Enter is considered in the keystroke features.</p>
-  
+
+          <hr />
+
           <div class="fieldsContainer">
+            <label>Username</label>
             <input type="text" class="form-control" id='usernameField' placeholder='Username'>
+
+            <hr />
+
+            <label>Password</label>
             <input type="text" class="form-control" id='passwordField' placeholder='Password'>
           </div>
         </div>
-  
+
         <div class="card col details">
           <h3 class="card-title">Individual</h3>
           <div class="">
@@ -46,9 +54,9 @@
               </tr>
             </table>
           </div>
-  
+
           <hr />
-  
+
           <h3 class="card-title">Full</h3>
           <div class="">
             <table class="table">
@@ -67,7 +75,7 @@
             </table>
           </div>
         </div>
-  
+
         <div class="card col">
           <table id="dataTable" class="table">
             <thead>
@@ -130,58 +138,58 @@
             </tfoot>
           </table>
         </div>
-  
+
       </div>
-  
+
       <div class="row">
         <div class="card col chartContainer">
           <label class="card-title">Standard full</label>
           <canvas id="standard_full"></canvas>
         </div>
-  
+
         <div class="card col chartContainer">
           <label class="card-title">Filtered full</label>
           <canvas id="filtered_full"></canvas>
         </div>
       </div>
-  
+
       <!-- Standard Charts -->
       <div class="row">
         <div class="card col chartContainer">
           <label class="card-title">Standard hold</label>
           <canvas id="standard_hold"></canvas>
         </div>
-  
+
         <div class="card col chartContainer">
           <label class="card-title">Standard flight</label>
           <canvas id="standard_flight"></canvas>
         </div>
-  
+
         <div class="card col chartContainer">
           <label class="card-title">Standard dd</label>
           <canvas id="standard_dd"></canvas>
         </div>
       </div>
-  
+
       <!-- Filtered Charts -->
       <div class="row">
         <div class="card col chartContainer">
           <label class="card-title">Filtered hold</label>
           <canvas id="filtered_hold"></canvas>
         </div>
-  
+
         <div class="card col chartContainer">
           <label class="card-title">Filtered flight</label>
           <canvas id="filtered_flight"></canvas>
         </div>
-  
+
         <div class="card col chartContainer">
           <label class="card-title">Filtered dd</label>
           <canvas id="filtered_dd"></canvas>
         </div>
       </div>
-  
-  
+
+
       <div class="row">
         <!-- Standard -->
         <div class="card col">
@@ -191,22 +199,22 @@
           </div>
 
           <hr />
-  
+
           <div class="sliders">
             <label class="font-size-16">Standard SD Multiplier</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="0" max="2.5" step="0.1" value="1.5" id="standard_slider_sd">
               <label id="standard_slider_sd_label">2.5</label>
             </div>
-  
+
             <label class="font-size-16">Standard Threshold</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="1" max="100" value="65" id="standard_slider_threshold">
               <label id="standard_slider_threshold_label">65</label>
             </div>
           </div>
         </div>
-  
+
         <!-- Filtered -->
         <div class="card col">
           <div class="custom-checkbox checkboxContainer">
@@ -215,22 +223,22 @@
           </div>
 
           <hr />
-  
+
           <div class="sliders">
             <label class="font-size-16">Filtered SD Multiplier</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="0" max="2.5" step="0.1" value="1.5" id="filtered_slider_sd">
               <label id="filtered_slider_sd_label">2.5</label>
             </div>
-  
+
             <label class="font-size-16">Filtered Threshold</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="1" max="100" value="65" id="filtered_slider_threshold">
               <label id="filtered_slider_threshold_label">65</label>
             </div>
           </div>
         </div>
-  
+
         <!-- Mahalanobis -->
         <div class="card col">
           <div class="custom-checkbox checkboxContainer">
@@ -239,46 +247,46 @@
           </div>
 
           <hr />
-  
+
           <div class="sliders">
             <label class="font-size-16">Mahalanobis Threshold</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="2" max="15" step="0.2" value="4" id="mahalanobis_slider_threshold">
               <label id="mahalanobis_slider_threshold_label">2</label>
             </div>
           </div>
         </div>
-  
+
         <!-- Full Standard -->
         <div class="card col">
           <div class="custom-checkbox checkboxContainer">
             <input type="checkbox" id="fullStandard_checkbox">
             <label for="fullStandard_checkbox" class="font-size-16">Use Standard (Full)</label>
           </div>
-  
+
           <hr />
 
           <div class="sliders">
             <label class="font-size-16">Standard (Full) Threshold</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="0" max="2" step="0.1" value="1" id="fullStandard_slider_threshold">
               <label id="fullStandard_slider_threshold_label">2</label>
             </div>
           </div>
         </div>
-  
+
         <!-- Full Filtered -->
         <div class="card col">
           <div class="custom-checkbox checkboxContainer">
             <input type="checkbox" id="fullFiltered_checkbox">
             <label for="fullFiltered_checkbox" class="font-size-16">Use Filtered (Full)</label>
           </div>
-  
+
           <hr />
 
           <div class="sliders">
             <label class="font-size-16">Filtered (Full) Threshold</label>
-            <div class="sliderContainer">
+            <div class="custom-range">
               <input type="range" min="0" max="5" step="0.1" value="1" id="fullFiltered_slider_threshold">
               <label id="fullFiltered_slider_threshold_label">2</label>
             </div>
@@ -286,7 +294,7 @@
         </div>
       </div>
     </div>
-    
+
   </div>
 
   <script src="js/halfmoon.min.js"></script>
