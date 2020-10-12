@@ -177,15 +177,6 @@ function sendToServer() {
     if(res.ok) {
       let response = await res.json();
 
-      if (!response.success) {
-        halfmoon.initStickyAlert({
-          content: `${response.msg}`,
-          title: "Signup failed",
-          alertType: "alert-danger",
-          fillType: "filled-lm"
-        });
-      }
-
       const table = document.getElementById('dataTable');
 
       detectors.map((detector, detectorIndex) => {
