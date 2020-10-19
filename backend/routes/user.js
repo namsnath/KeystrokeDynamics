@@ -81,6 +81,7 @@ router.post('/login', async (req, res) => {
     keydown,
     keyup,
     username,
+    controls,
   } = req.body;
 
   const processedAttempt = processKeystrokeData({ keydown, keyup });
@@ -104,7 +105,7 @@ router.post('/login', async (req, res) => {
   const result = processAttempt({
     userKeystrokeData: userInDb.keystrokeData,
     attemptKeystrokeData: processedAttempt,
-    ...req.body,
+    controls,
   });
 
   if (result.accepted) {
