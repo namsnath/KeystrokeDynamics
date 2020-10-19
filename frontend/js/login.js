@@ -4,6 +4,8 @@ var keyCount = 0;
 
 var usernameField, passwordField;
 
+const LOGIN_LINK = 'http://localhost:3001/user/login';
+
 // For charts
 const chartTypes = ['standard', 'filtered'];
 const types = ['hold', 'flight', 'dd', 'full'];
@@ -142,24 +144,12 @@ function sendToServer() {
     keydown: keydownArray,
     keyup: keyupArray,
 
-    useStandard: controls.standard.checkbox.checked,
-    useFullStandard: controls.fullStandard.checkbox.checked,
-    useFiltered: controls.filtered.checkbox.checked,
-    useFullFiltered: controls.fullFiltered.checkbox.checked,
-    useMahalanobis: controls.mahalanobis.checkbox.checked,
-
-    standardThreshold: Number(controls.standard.slider.threshold.value),
-    filteredThreshold: Number(controls.filtered.slider.threshold.value),
-    fullStandardThreshold: Number(controls.fullStandard.slider.threshold.value),
-    fullFilteredThreshold: Number(controls.fullFiltered.slider.threshold.value),
-    mahalanobisThreshold: Number(controls.mahalanobis.slider.threshold.value),
-    standardSdMultiplier: Number(controls.standard.slider.sd.value),
-    filteredSdMultiplier: Number(controls.filtered.slider.sd.value),
+    controls: getRequestData(),
   };
 
   clearData();
 
-  fetch('http://localhost:3001/user/login', {
+  fetch(LOGIN_LINK, {
     method: 'POST',
     mode: 'cors',
     headers: {
@@ -318,6 +308,34 @@ function initialiseControls() {
       }
     });
   });
+}
+
+function getRequestData() {
+  const data = {};
+
+  Object.keys(controls).map((detector) => {
+    data[detector] = {};
+    
+    Object.keys(controls[detector]).map((controlType) => {
+      if (controlType === 'label') return;
+
+      if (controlType === 'checkbox') {
+        data[detector].use = controls[detector][controlType].checked;
+        return;
+      } 
+
+      if (controlType === 'slider') {
+        Object.keys(controls[detector][controlType]).map((sliderType) => {
+          data[detector][sliderType] = Number(
+            controls[detector][controlType][sliderType].value
+          );
+        });
+        return;
+      }
+    });
+  });
+
+  return data;
 }
 
 window.onload = function () {
