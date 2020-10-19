@@ -11,8 +11,8 @@ const chartTypes = ['standard', 'filtered'];
 const types = ['hold', 'flight', 'dd', 'full'];
 
 const responseKeys = {
-  standard: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
-  filtered: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
+  standard: ['use', 'threshold', 'sd', 'inRangePercent.full', 'inRange.full'],
+  filtered: ['use', 'threshold', 'sd', 'inRangePercent.full', 'inRange.full'],
   mahalanobis: ['use', 'threshold', '', 'distance.full', 'inRange.full'],
   fullStandard: ['use', 'threshold', '', 'normedDistance.full', 'inRange.full'],
   fullFiltered: ['use', 'threshold', '', 'normedDistance.full', 'inRange.full'],

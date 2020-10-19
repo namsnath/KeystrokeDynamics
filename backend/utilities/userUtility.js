@@ -288,12 +288,16 @@ const addAttemptToKeystrokeData = ({
   return userData;
 };
 
-const processStandard = ({
+const processStandard = (
   userKeystrokeData,
   attemptKeystrokeData,
-  standardSdMultiplier = SD_MULTIPLIER,
-  standardThreshold = THRESHOLD_PERCENT,
-}) => {
+  controls,
+) => {
+  const {
+    threshold = THRESHOLD_PERCENT,
+    sd: sdMult = SD_MULTIPLIER,
+  } = controls;
+
   const scores = {
     distance: {},
     inRange: {},
@@ -313,8 +317,8 @@ const processStandard = ({
       const sd = userKeystrokeData[type].sd[i];
       const attemptTime = attemptKeystrokeData[type].times[i];
 
-      const low = mean - (sd * standardSdMultiplier);
-      const high = mean + (sd * standardSdMultiplier);
+      const low = mean - (sd * sdMult);
+      const high = mean + (sd * sdMult);
 
       const distance = cityblock(mean, attemptTime);
 
@@ -327,7 +331,7 @@ const processStandard = ({
     });
 
     scores.inRangePercent[type] = (inRangeCount / totalCount) * 100;
-    if (scores.inRangePercent[type] >= standardThreshold) {
+    if (scores.inRangePercent[type] >= threshold) {
       scores.inRange[type] = true;
     }
 
@@ -337,12 +341,16 @@ const processStandard = ({
   return scores;
 };
 
-const processFiltered = ({
+const processFiltered = (
   userKeystrokeData,
   attemptKeystrokeData,
-  filteredSdMultiplier = SD_MULTIPLIER,
-  filteredThreshold = THRESHOLD_PERCENT,
-}) => {
+  controls,
+) => {
+  const {
+    threshold = THRESHOLD_PERCENT,
+    sd: sdMult = SD_MULTIPLIER,
+  } = controls;
+
   const scores = {
     distance: {},
     inRange: {},
@@ -362,8 +370,8 @@ const processFiltered = ({
       const sd = userKeystrokeData[type].filteredSd[i];
       const attemptTime = attemptKeystrokeData[type].times[i];
 
-      const low = mean - (sd * filteredSdMultiplier);
-      const high = mean + (sd * filteredSdMultiplier);
+      const low = mean - (sd * sdMult);
+      const high = mean + (sd * sdMult);
 
       const distance = cityblock(mean, attemptTime);
 
@@ -376,7 +384,7 @@ const processFiltered = ({
     });
 
     scores.inRangePercent[type] = (inRangeCount / totalCount) * 100;
-    if (scores.inRangePercent[type] >= filteredThreshold) {
+    if (scores.inRangePercent[type] >= threshold) {
       scores.inRange[type] = true;
     }
 
@@ -386,11 +394,15 @@ const processFiltered = ({
   return scores;
 };
 
-const processMahalanobis = ({
+const processMahalanobis = (
   userKeystrokeData,
   attemptKeystrokeData,
-  mahalanobisThreshold = MAHALANOBIS_THRESHOLD,
-}) => {
+  controls,
+) => {
+  const {
+    threshold = MAHALANOBIS_THRESHOLD,
+  } = controls;
+
   const scores = {
     normedDistance: {},
     distance: {},
@@ -413,7 +425,7 @@ const processMahalanobis = ({
     );
 
     scores.normedDistance[type] = normedDistance;
-    if (normedDistance <= mahalanobisThreshold) {
+    if (normedDistance <= threshold) {
       scores.inRange[type] = true;
     }
 
@@ -423,11 +435,15 @@ const processMahalanobis = ({
   return scores;
 };
 
-const processFullStandard = ({
+const processFullStandard = (
   userKeystrokeData,
   attemptKeystrokeData,
-  fullStandardThreshold = FULL_STANDARD_THRESHOLD,
-}) => {
+  controls,
+) => {
+  const {
+    threshold = FULL_STANDARD_THRESHOLD,
+  } = controls;
+
   const scores = {
     normedDistance: {},
     distance: {},
@@ -449,7 +465,7 @@ const processFullStandard = ({
     );
 
     scores.normedDistance[type] = normedDistance;
-    if (normedDistance <= fullStandardThreshold) {
+    if (normedDistance <= threshold) {
       scores.inRange[type] = true;
     }
 
@@ -459,11 +475,15 @@ const processFullStandard = ({
   return scores;
 };
 
-const processFullFiltered = ({
+const processFullFiltered = (
   userKeystrokeData,
   attemptKeystrokeData,
-  fullFilteredThreshold = FULL_FILTERED_THRESHOLD,
-}) => {
+  controls,
+) => {
+  const {
+    threshold = FULL_FILTERED_THRESHOLD,
+  } = controls;
+
   const scores = {
     normedDistance: {},
     distance: {},
@@ -485,7 +505,7 @@ const processFullFiltered = ({
     );
 
     scores.normedDistance[type] = normedDistance;
-    if (normedDistance <= fullFilteredThreshold) {
+    if (normedDistance <= threshold) {
       scores.inRange[type] = true;
     }
 
@@ -496,102 +516,49 @@ const processFullFiltered = ({
 };
 
 const processAttempt = ({
-  userKeystrokeData,
-  attemptKeystrokeData,
-  useStandard = true,
-  useFullStandard = true,
-  useFiltered = true,
-  useFullFiltered = true,
-  useMahalanobis = false,
-  standardThreshold = THRESHOLD_PERCENT,
-  fullStandardThreshold = FULL_STANDARD_THRESHOLD,
-  fullFilteredThreshold = FULL_FILTERED_THRESHOLD,
-  filteredThreshold = THRESHOLD_PERCENT,
-  mahalanobisThreshold = MAHALANOBIS_THRESHOLD,
-  standardSdMultiplier = SD_MULTIPLIER,
-  filteredSdMultiplier = SD_MULTIPLIER,
+  userKeystrokeData: ukd,
+  attemptKeystrokeData: akd,
+  controls,
 }) => {
+  const {
+    standard: stControls,
+    filtered: flControls,
+    fullStandard: stPopControls,
+    fullFiltered: flPopControls,
+    mahalanobis: mhControls,
+  } = controls;
+
   const result = {
     standard: {
-      use: useStandard,
-      threshold: standardThreshold,
-      sdMultiplier: standardSdMultiplier,
-      distance: {},
-      inRange: {},
+      ...stControls,
+      ...processStandard(ukd, akd, stControls),
     },
     fullStandard: {
-      use: useFullStandard,
-      threshold: fullStandardThreshold,
-      distance: {},
-      inRange: {},
+      ...stPopControls,
+      ...processFullStandard(ukd, akd, stPopControls),
     },
     filtered: {
-      use: useFiltered,
-      threshold: filteredThreshold,
-      sdMultiplier: filteredSdMultiplier,
-      distance: {},
-      inRange: {},
+      ...flControls,
+      ...processFiltered(ukd, akd, flControls),
     },
     fullFiltered: {
-      use: useFullFiltered,
-      threshold: fullFilteredThreshold,
-      distance: {},
-      inRange: {},
+      ...flPopControls,
+      ...processFullFiltered(ukd, akd, flPopControls),
     },
     mahalanobis: {
-      use: useMahalanobis,
-      threshold: mahalanobisThreshold,
-      distance: {},
-      inRange: {},
+      ...mhControls,
+      ...processMahalanobis(ukd, akd, mhControls),
     },
     accepted: false,
   };
 
-  const mahalanobisScores = processMahalanobis({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    mahalanobisThreshold,
-  });
-
-  const fullStandardScores = processFullStandard({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    fullStandardThreshold,
-  });
-
-  const fullFilteredScores = processFullFiltered({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    fullFilteredThreshold,
-  });
-
-  const indivStandardScores = processStandard({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    standardSdMultiplier,
-    standardThreshold,
-  });
-
-  const indivFilteredScores = processFiltered({
-    userKeystrokeData,
-    attemptKeystrokeData,
-    filteredSdMultiplier,
-    filteredThreshold,
-  });
-
-  result.mahalanobis = { ...result.mahalanobis, ...mahalanobisScores };
-  result.fullStandard = { ...result.fullStandard, ...fullStandardScores };
-  result.fullFiltered = { ...result.fullFiltered, ...fullFilteredScores };
-  result.standard = { ...result.standard, ...indivStandardScores };
-  result.filtered = { ...result.filtered, ...indivFilteredScores };
-
-  result.accepted = (useStandard || useFiltered || useMahalanobis
-    || useFullFiltered || useFullStandard)
-    && (!useMahalanobis || mahalanobisScores.inRange.full)
-    && (!useFullStandard || fullStandardScores.inRange.full)
-    && (!useFullFiltered || fullFilteredScores.inRange.full)
-    && (!useStandard || indivStandardScores.inRange.full)
-    && (!useFiltered || indivFilteredScores.inRange.full);
+  result.accepted = (stControls.use || flControls.use || mhControls.use
+    || flPopControls.use || stPopControls.use)
+    && (!mhControls.use || result.mahalanobis.inRange.full)
+    && (!stPopControls.use || result.fullStandard.inRange.full)
+    && (!flPopControls.use || result.fullFiltered.inRange.full)
+    && (!stControls.use || result.standard.inRange.full)
+    && (!flControls.use || result.filtered.inRange.full);
 
   return result;
 };
