@@ -8,12 +8,6 @@ var usernameField, passwordField;
 const chartTypes = ['standard', 'filtered'];
 const types = ['hold', 'flight', 'dd', 'full'];
 
-// For controls
-const detectors = ['standard', 'filtered', 'mahalanobis', 'fullStandard', 'fullFiltered'];
-const controlTypes = ['checkbox', 'slider'];
-const sliderTypes = ['threshold', 'sd'];
-const labelTypes = ['checkbox', 'threshold', 'sd'];
-
 const responseKeys = {
   standard: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
   filtered: ['use', 'threshold', 'sdMultiplier', 'inRangePercent.full', 'inRange.full'],
@@ -26,7 +20,6 @@ const charts = chartTypes.reduce((a, v) => ({
   ...a,
   [v]: types.reduce((acc, val) => ({...acc, [val]: undefined}), {}),
 }), {});
-console.log(charts);
 
 // Define controls present in HTML here
 const controls = {
@@ -179,7 +172,7 @@ function sendToServer() {
 
       const table = document.getElementById('dataTable');
 
-      detectors.map((detector, detectorIndex) => {
+      Object.keys(controls).map((detector, detectorIndex) => {
         const data = response.result[detector];
         const keys = responseKeys[detector];
 
@@ -291,10 +284,10 @@ function populateChartWithResponse(chart, label="", datasetLabel, data) {
 }
 
 function initialiseControls() {
-  detectors.map((detector) => {
+  Object.keys(controls).map((detector) => {
     if (!(detector in controls)) return;
     
-    controlTypes.map((controlType) => {
+    Object.keys(controls[detector]).map((controlType) => {
       if(!(controlType in controls[detector])) return;
 
       if (controlType === 'checkbox') {
@@ -306,7 +299,7 @@ function initialiseControls() {
       } 
 
       if (controlType === 'slider') {
-        sliderTypes.map((sliderType) => {
+        Object.keys(controls[detector][controlType]).map((sliderType) => {
           if(!(sliderType in controls[detector][controlType])) return;
 
           const controlId = `${detector}_${controlType}_${sliderType}`;
