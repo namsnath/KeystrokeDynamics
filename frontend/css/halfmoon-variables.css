@@ -92,6 +92,7 @@ CSS variables (CSS custom properties)
         28. Button group --------------------------------------------- [hmv-28]
         29. Collapse ------------------------------------------------- [hmv-29]
         30. Progress ------------------------------------------------- [hmv-30]
+        31. Range ---------------------------------------------------- [hmv-31]
     
     Understanding names of variables:
         ~ Variable names are long, descriptive, and fairly self-explanatory. 
@@ -2417,6 +2418,64 @@ CSS variables (CSS custom properties)
 
     --dm-progress-bar-animated-highlight-bg-color: var(--lm-progress-bar-animated-highlight-bg-color);
     --dm-progress-bar-animated-highlight-dark-bg-color: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.2));
+
+
+    /*
+    ---------------------------------------------------------------------------
+    31. Range [hmv-31]
+    ---------------------------------------------------------------------------
+    */
+
+    --range-line-height: 1.6rem;
+    /* Thumb */
+    --range-thumb-width: 1.4rem;
+    --range-thumb-height: 1.4rem;
+    --range-thumb-border-radius: 50%;
+    --range-thumb-border-width: var(--base-border-width);
+    --range-thumb-margin-top: -0.2rem;
+
+    /* Track */
+    --range-track-width: 100%;
+    --range-track-height: 1rem;
+    --range-track-border-radius: 2rem;
+    --range-track-border-width: var(--base-border-width);
+
+    /* Label */
+    --range-label-padding-left: 1rem;
+
+
+    /* Light Mode Thumb */
+    --lm-range-thumb-bg-color: #ffffff;
+    --lm-range-thumb-border-color:  rgba(0, 0, 0, 0.3);
+    --lm-range-thumb-bg-color-hover: var(--lm-range-thumb-bg-color);
+    --lm-range-thumb-border-color-hover:  rgba(0, 0, 0, 0.4);
+    --lm-range-thumb-border-color-focus: var(--lm-checkbox-border-color-focus);
+    --lm-range-thumb-box-shadow-focus: var(--lm-checkbox-box-shadow-focus);
+    
+    /* Light Mode Track */
+    --lm-range-track-bg-color: rgba(0, 0, 0, 0.1);
+    --lm-range-track-border-color:  rgba(0, 0, 0, 0.3);
+    --lm-range-track-bg-color-hover: var(--lm-range-track-bg-color);
+    --lm-range-track-border-color-hover:  rgba(0, 0, 0, 0.4);
+    --lm-range-track-border-color-focus: var(--lm-checkbox-border-color-focus);
+    --lm-range-track-box-shadow-focus: var(--lm-checkbox-box-shadow-focus);
+
+
+    /* Dark Mode Thumb */
+    --dm-range-thumb-bg-color: #ffffff;
+    --dm-range-thumb-border-color:  rgba(255, 255, 255, 0.15);
+    --dm-range-thumb-bg-color-hover: var(--dm-range-thumb-bg-color);
+    --dm-range-thumb-border-color-hover:  rgba(255, 255, 255, 0.3);
+    --dm-range-thumb-border-color-focus: var(--dm-checkbox-border-color-focus);
+    --dm-range-thumb-box-shadow-focus: var(--dm-checkbox-box-shadow-focus);
+
+    /* Dark Mode Track */
+    --dm-range-track-bg-color: rgba(255, 255, 255, 0.1);
+    --dm-range-track-border-color:  rgba(255, 255, 255, 0.15);
+    --dm-range-track-bg-color-hover: var(--dm-range-track-bg-color);
+    --dm-range-track-border-color-hover:  rgba(255, 255, 255, 0.3);
+    --dm-range-track-border-color-focus: var(--dm-checkbox-border-color-focus);
+    --dm-range-track-box-shadow-focus: var(--dm-checkbox-box-shadow-focus);
 }
 
 
@@ -7518,6 +7577,164 @@ select.form-control[multiple] > option:disabled {
 .dark-mode .custom-switch input[type="checkbox"]:hover:disabled:checked~label:before {
     background-color: var(--dm-switch-bg-color-checked);
     border-color: var(--dm-switch-border-color-checked);
+}
+
+/* Range */
+/* Note:
+    - Background color should be given only to the input element, not the
+    tracks using vendor-prefixes. This causes two different backgrounds, layered
+    on each other, causing a different color to show through.
+    - Hover and focus background colors only seem to work on the vendor-prefixes
+*/
+
+.custom-range {
+    display: flex;
+    position: relative;
+    align-items: center;
+    line-height: var(--range-line-height);
+}
+.custom-range label {
+    display: inline-block;
+    margin-bottom: 0;
+    padding-left: var(--range-label-padding-left);
+}
+
+.custom-range input[type="range"] {
+    -webkit-appearance: none;
+    width: var(--range-track-width);
+    height: var(--range-track-height);
+    border-radius: var(--range-track-border-radius);
+    border-width: var(--range-track-border-width);
+    background-color: var(--lm-range-track-bg-color);
+    border-color: var(--lm-range-track-border-color);
+}
+.custom-range input[type=range]:focus {
+    outline: none;
+}
+/* Range - Webkit */
+.custom-range input[type=range]::-webkit-slider-runnable-track {
+    cursor: pointer;
+    width: var(--range-track-width);
+    height: var(--range-track-height);
+    border-radius: var(--range-track-border-radius);
+    border-width: var(--range-track-border-width);
+    border-color: var(--lm-range-track-border-color);
+}
+.custom-range input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    cursor: pointer;
+    height: var(--range-thumb-height);
+    width: var(--range-thumb-width);
+    /* margin-top to center the thumb on track */
+    margin-top: var(--range-thumb-margin-top); 
+    border-radius: var(--range-thumb-border-radius);
+    border-style: solid;
+    border-width: var(--range-thumb-border-width);
+    border-color: var(--lm-range-thumb-border-color);
+    background-color: var(--lm-range-thumb-bg-color);
+}
+/* Range - Mozilla */
+.custom-range input[type=range]::-moz-range-track {
+    cursor: pointer;
+    width: var(--range-track-width);
+    height: var(--range-track-height);
+    border-radius: var(--range-track-border-radius);
+    border-width: var(--range-track-border-width);
+    border-color: var(--lm-range-track-border-color);
+}
+.custom-range input[type=range]::-moz-range-thumb {
+    cursor: pointer;
+    height: var(--range-thumb-height);
+    width: var(--range-thumb-width);
+    border-radius: var(--range-thumb-border-radius);
+    border-width: var(--range-thumb-border-width);
+    border-color: var(--lm-range-thumb-border-color);
+    background-color: var(--lm-range-thumb-bg-color);
+}
+/* Hover */
+.custom-range input[type=range]:hover::-webkit-slider-runnable-track {
+    background-color: var(--lm-range-track-bg-color-hover);
+    border-color: var(--lm-range-track-border-color-hover);
+}
+.custom-range input[type=range]:hover::-webkit-slider-thumb {
+    background-color: var(--lm-range-thumb-bg-color-hover);
+    border-color: var(--lm-range-thumb-border-color-hover);
+}
+.custom-range input[type=range]:hover::-moz-range-track {
+    background-color: var(--lm-range-track-bg-color-hover);
+    border-color: var(--lm-range-track-border-color-hover);
+}
+.custom-range input[type=range]:hover::-moz-range-thumb {
+    background-color: var(--lm-range-thumb-bg-color-hover);
+    border-color: var(--lm-range-thumb-border-color-hover);
+}
+/* Focus */
+.custom-range input[type=range]:focus::-webkit-slider-runnable-track {
+    border-color: var(--lm-range-track-border-color-focus);
+}
+.custom-range input[type=range]:focus::-webkit-slider-thumb {
+    box-shadow: var(--lm-range-thumb-box-shadow-focus);
+    border-color: var(--lm-range-thumb-border-color-focus);
+}
+.custom-range input[type=range]:focus::-moz-range-track {
+    border-color: var(--lm-range-track-border-color-focus);
+}
+.custom-range input[type=range]:focus::-moz-range-thumb {
+    box-shadow: var(--lm-range-thumb-box-shadow-focus);
+    border-color: var(--lm-range-thumb-border-color-focus);
+}
+/* Range - Dark Mode */
+.dark-mode .custom-range input[type="range"] {
+    background-color: var(--dm-range-track-bg-color);
+}
+.dark-mode .custom-range input[type=range]::-webkit-slider-runnable-track {
+    border-color: var(--dm-range-track-border-color);
+}
+.dark-mode .custom-range input[type=range]::-webkit-slider-thumb {
+    border-color: var(--dm-range-thumb-border-color);
+    background-color: var(--dm-range-thumb-bg-color);
+}
+.dark-mode .custom-range input[type=range]::-moz-range-track {
+    border-color: var(--dm-range-track-border-color);
+}
+.dark-mode .custom-range input[type=range]::-moz-range-thumb {
+    border-color: var(--dm-range-thumb-border-color);
+    background-color: var(--dm-range-thumb-bg-color);
+}
+/* Hover */
+.dark-mode .custom-range input[type=range]:hover::-webkit-slider-runnable-track {
+    background-color: var(--dm-range-track-bg-color-hover);
+    border-color: var(--dm-range-track-border-color-hover);
+}
+.dark-mode .custom-range input[type=range]:hover::-webkit-slider-thumb {
+    background-color: var(--dm-range-thumb-bg-color-hover);
+    border-color: var(--dm-range-thumb-border-color-hover);
+}
+.dark-mode .custom-range input[type=range]:hover::-moz-range-track {
+    background-color: var(--dm-range-track-bg-color-hover);
+    border-color: var(--dm-range-track-border-color-hover);
+}
+.dark-mode .custom-range input[type=range]:hover::-moz-range-thumb {
+    background-color: var(--dm-range-thumb-bg-color-hover);
+    border-color: var(--dm-range-thumb-border-color-hover);
+}
+/* Focus */
+.dark-mode .custom-range input[type=range]:focus::-webkit-slider-runnable-track {
+    /* box-shadow: var(--dm-range-track-box-shadow-focus); */
+    border-color: var(--dm-range-track-border-color-focus);
+}
+.dark-mode .custom-range input[type=range]:focus::-webkit-slider-thumb {
+    box-shadow: var(--dm-range-thumb-box-shadow-focus);
+    border-color: var(--dm-range-thumb-border-color-focus);
+}
+.dark-mode .custom-range input[type=range]:focus::-moz-range-track {
+    /* box-shadow: var(--dm-range-track-box-shadow-focus); */
+    border-color: var(--dm-range-track-border-color-focus);
+}
+.dark-mode .custom-range input[type=range]:focus::-moz-range-thumb {
+    /* -moz-box-shadow: var(--dm-range-thumb-box-shadow-focus); */
+    box-shadow: var(--dm-range-thumb-box-shadow-focus);
+    border-color: var(--dm-range-thumb-border-color-focus);
 }
 
 /* Input file */
